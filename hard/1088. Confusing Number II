@@ -1,0 +1,36 @@
+#Maths, Backtracking
+#Time Complexity - O(5^m) where m is the length of N
+#Space Complexity
+
+class Solution:
+  def is_under_limit(self, n):
+    return n <= self.N
+
+  def backtrack(self, num, confused_no, digit_power):
+    
+    
+    num_into_10 = num*10
+    for possible_digit in self.digits:
+      if num == 0 and possible_digit == 0: continue
+        
+      num = (num_into_10 + possible_digit) 
+      
+      if not self.is_under_limit(num): 
+        return
+        
+      confusing_num = digit_power * self.invert_hash[possible_digit]+ confused_no
+
+      if num != confusing_num: self.results += 1
+
+      self.backtrack(num, confusing_num, digit_power*10)
+
+
+  def confusingNumberII(self, N):
+    self.N = N
+    self.results = 0
+    self.invert_hash = {0: 0, 1: 1, 6: 9, 8: 8, 9: 6}
+    self.digits = (0,1,6,8,9)
+    self.backtrack(0, 0, 1)
+    return self.results
+
+        
