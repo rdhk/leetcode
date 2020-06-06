@@ -1,0 +1,34 @@
+#Greedy
+#Time Complexity - n^2 + nlogn - O(n^2)
+#Space Complexity - O(n)
+
+#First sort all the people by height in descending and k in ascending
+#For taller people, shorter people are insignificant. So, we first place taller people, always at kth index, and then next taller people at kth index
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        people.sort(key = lambda x: (-x[0], x[1]))
+        result = []
+        
+        for height, k in people:
+          result.insert(k, [height, k] )
+        
+        return result
+
+
+
+#First sort all people by height in ascending and k in descending
+#Init a result array = [None]*length, and indices_availble
+#For each shortest person, find the kth index avialable and place the shortest element at that posn
+
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        people.sort(key= lambda x: (x[0], -x[1]))
+        length = len(people)
+        result = [None]*length
+        indices = [i for i in range(length)]
+        
+        for val in people:
+          i = indices.pop(val[1])
+          result[i] = val
+          
+        return result
