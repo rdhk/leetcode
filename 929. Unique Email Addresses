@@ -1,0 +1,15 @@
+#Space - O(n*len(emails)) for set
+#Time - O(n*len(emails))
+#Remember replace and split
+
+class Solution:
+    def numUniqueEmails(self, emails: List[str]) -> int:
+      emails_set = set()
+      
+      for email in emails:
+        local, domain = email.split('@')
+        local = local.split('+')[0].replace('.', '')
+        
+        emails_set.add(local + '@' + domain)
+      return len(emails_set)
+        
