@@ -1,0 +1,66 @@
+#Time Complexity - O(s)
+#Space - O(2^k) - for storing 2^k nos
+#"0000000001011100", k = 4
+#Using Bit Manipulation
+
+class Solution:
+    def hasAllCodes(self, s: str, k: int) -> bool:
+       
+        s_len = len(s)
+        if(s_len < k):
+          return False
+        
+        required_nos = set()
+        hash_val = {'0': 0,'1': 1}
+          
+        current_num = 0
+        
+        for i in range(k):
+          
+          current_num = (current_num << 1)  ^ (hash_val[s[i]]) #0
+        
+        #O(s)
+        required_nos.add(current_num) #{1 to 15}
+        count = 1
+        max_count = 2**k
+        for i in range(k, s_len):
+          if count == max_count: return True
+          current_num <<= 1
+          current_num = current_num & ~(1 << k)
+          current_num ^= (hash_val[s[i]])
+
+          if current_num not in required_nos:
+            count += 1
+            required_nos.add(current_num)
+            
+        return count == max_count
+        
+  
+  #Using just substrings of length k
+  # length(s)*k
+  #If you use String as hashset's key, the time complexity is not O(|s|), but O(|s| * k). Since calculate the hashcode of a string in length k costs O(k) time.
+  
+  class Solution:
+    def hasAllCodes(self, s: str, k: int) -> bool:
+        s_len = len(s)
+        if(s_len < k): return False
+        required_nos = set()
+        
+        #O(s)
+        # required_nos.add(current_num) #{1 to 15}
+        count = 0
+        max_count = 2**k
+        for i in range(s_len - k + 1):
+          if count == max_count: return True
+
+          current_num = s[i:i+k]
+          if current_num not in required_nos:
+            count += 1
+            required_nos.add(current_num)
+        return count == max_count
+        
+        
+  
+        
+        
+        
