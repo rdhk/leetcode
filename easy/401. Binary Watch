@@ -24,6 +24,8 @@ class Solution:
           no_bits[i] = self.set_bits(i)
           
         for i in range(12):
+          if no_bits[i] > num:
+            continue
           unused_bits = (num - no_bits[i])
           for j in range(60):
             if no_bits[j] == unused_bits:
