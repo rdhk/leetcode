@@ -1,0 +1,31 @@
+#For each possible hour and minutes, check if its sum of set bits is num
+#Time Complexity - O(60*32 + 12*60) -> O(1)
+#Space Complexity - O(60) - O(1)
+# Break early if num > 8, because max 3 bits set in hours < 12, max 5 bits set in mins < 60
+
+class Solution:
+  
+    def set_bits(self, num):
+      
+      count = 0
+      while(num > 0):
+        num = num & (num-1)
+        count += 1
+      return count
+    
+    def readBinaryWatch(self, num: int) -> List[str]:
+        #max 3 bits set in hours < 12, max 5 bits set in mins < 60
+        if num > 8: return []
+        results = []
+        no_bits = {}
+        
+        #constant - 60*32
+        for i in range(60):
+          no_bits[i] = self.set_bits(i)
+          
+        for i in range(12):
+          unused_bits = (num - no_bits[i])
+          for j in range(60):
+            if no_bits[j] == unused_bits:
+              results.append(str(i) + ':' + str(j).zfill(2))
+        return results
