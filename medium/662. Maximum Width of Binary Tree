@@ -1,0 +1,69 @@
+#BFS Traversal
+
+class Solution:
+    def widthOfBinaryTree(self, root: TreeNode) -> int:
+      
+      if not root: return 0
+      
+      max_width = 0
+      
+      queue = collections.deque([])
+      
+      queue.append((root, 0))
+      
+      while(queue):
+        no_elements = len(queue)
+        
+        left = None
+        for i in range(no_elements):
+          curr_el, idx = queue.popleft()
+          if left is None: 
+            left = idx
+            
+          right = idx
+          
+          if curr_el.left:
+            queue.append((curr_el.left, 2*idx + 1))
+          if curr_el.right:
+            queue.append((curr_el.right, 2*idx + 2))
+        max_width = max(max_width, right - left + 1)
+        
+      return max_width
+      
+      
+      #DFS with a hashmap {depth -> leftmost node idx}
+      # Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+
+
+class Solution:
+    def widthOfBinaryTree(self, root: TreeNode) -> int:
+      
+      if not root: return 0
+      
+      max_width = 0
+      
+      stack = []
+      stack.append((root, 0, 0))
+      
+      leftmost_idx = {}
+      
+      while(stack):
+        curr, depth, idx = stack.pop()
+        
+        if depth not in leftmost_idx:
+          leftmost_idx[depth] = idx
+        
+        max_width = max(max_width, idx - leftmost_idx[depth] + 1)
+        
+        if curr.right:
+          stack.append((curr.right, depth+1, idx*2 + 2))
+        if curr.left:
+          stack.append((curr.left, depth+1, idx*2 + 1))
+      return max_width
+          
