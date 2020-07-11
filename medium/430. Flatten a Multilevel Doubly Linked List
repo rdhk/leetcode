@@ -1,0 +1,87 @@
+#Time and space complexity -> O(n), O(n)
+
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, prev, next, child):
+        self.val = val
+        self.prev = prev
+        self.next = next
+        self.child = child
+"""
+
+#DFS recursion update prev and next before going into recursion
+
+
+class Solution:
+  
+    def dfs(self, head):
+      if not head: return head
+      
+      right = head.next
+      child = head.child
+      tail = head
+      if child:
+        head.next = child
+        child.prev = head
+        head.child = None
+        tail = self.dfs(child)
+      
+      if right:
+        tail.next = right
+        right.prev = tail
+        tail = self.dfs(right)
+        
+      return tail 
+      
+    def flatten(self, head: 'Node') -> 'Node':
+        self.dfs(head)
+        return head
+        
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, prev, next, child):
+        self.val = val
+        self.prev = prev
+        self.next = next
+        self.child = child
+"""
+
+
+#DFS Iterative
+
+class Solution:
+  
+    def dfs(self, prev, curr):
+
+      stack = []
+      stack.append(curr)
+      
+      while(stack):
+        curr = stack.pop()
+        
+        prev.next = curr
+        curr.prev = prev
+        
+        if curr.next:
+          stack.append(curr.next)
+          curr.next = None
+          
+        if curr.child:
+          stack.append(curr.child)
+          curr.child = None
+          
+        prev = curr
+      return prev
+        
+          
+        
+    
+    def flatten(self, head: 'Node') -> 'Node':
+        if not head: return None
+        dummy = Node(-1, None, head, None)
+        self.dfs(dummy, head)
+        dummy.next.prev = None
+        
+        return dummy.next
