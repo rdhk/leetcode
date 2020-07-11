@@ -1,0 +1,32 @@
+class Solution:
+  
+    def groups_posssible(self, max_grp_size, m):
+      groups = 1
+      running_sum = 0
+      for num in self.nums:
+        if groups > m:
+          return groups
+        if (running_sum + num) > max_grp_size:
+          groups += 1
+          running_sum = num
+        else:
+          running_sum += num 
+      return groups
+      
+      
+    def splitArray(self, nums: List[int], m: int) -> int:
+        left = max(nums)
+        right = sum(nums)
+        self.nums = nums
+        while(left < right):
+          mid = left + (right-left)//2
+          
+          groups_possible = self.groups_posssible(mid, m)
+          
+          if groups_possible <= m:
+            right = mid
+          else:
+            left = mid + 1
+        return left
+            
+          
