@@ -1,0 +1,38 @@
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+#Iterarive DFS using stack
+#Time and space Complexity - O(n)
+class Solution:
+    def flatten(self, root: TreeNode) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        """
+        
+        if not root: return None
+        dummy = TreeNode(-1, None, root)
+        prev = dummy
+        stack = []
+        
+        stack.append(root)
+        
+        while(stack):
+          curr = stack.pop()
+          prev.right = curr
+          
+          if curr.right:
+            stack.append(curr.right)
+          if curr.left:
+            
+            stack.append(curr.left)
+            #because we'll mark curr.right = next in next iteration, but we'll never come back to update left pointer of curr node
+            curr.left = None
+          prev = curr
+        return dummy.right
+            
+          
+        
