@@ -1,0 +1,12 @@
+#Time an space are both O(1)
+#Find degrees of both hour and mins and diff them both and then find the min of diff, (360 - diff)
+
+class Solution:
+    def angleClock(self, hour: int, minutes: int) -> float:
+
+        hour_degrees = ((hour % 12) + (minutes/60))*30
+        minutes_degrees = minutes * 6
+        
+        diff = abs(hour_degrees - minutes_degrees)
+        diff = min(diff, 360 - diff)
+        return diff
