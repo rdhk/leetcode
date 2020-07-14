@@ -1,0 +1,59 @@
+#Time Complexity - O(32)
+#Keep getting rightmost bit, and keep shifting reversed int to left by 1 and appending the rightmost bit(which will keep going left)
+
+class Solution:
+    def reverseBits(self, n: int) -> int:
+        rev_n = 0
+        
+        for i in range(32):
+          rightmost = (n & 1)
+          #rev = rev*2 + carry
+          rev_n = (rev_n << 1) | rightmost
+          n = (n >> 1)
+        return rev_n
+        
+#Worst Time Complexity - O(32), Best Time Complexity -> O(max posn from right where 1 is set)
+#Keep getting rightmost bit while num is not 0, and keep or'ing or adding 2^(31-power) ie (righmostbit << (31-power)) | rev or (rev + (righmostbit << (31-power))) 
+since bit at (31-power) will always be previously unset due to uniqueness of (31-power)
+
+class Solution:
+    def reverseBits(self, n: int) -> int:
+        rev_n = 0
+
+        for i in range(32):
+          
+          if not n:
+            break
+            
+          rightmost = (n & 1)
+          rev_n = ((rev_n) | (rightmost << (31-i)))
+          n = (n >> 1)
+        return rev_n
+
+#Time Complexity - O(5) ie log 32
+#Simulation:
+#1,2,3,4,5,6,7,8 9,10,11,12,13,14,15 | 16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
+#n = (n << 16) | (n >> 16)
+#17,18,19,20,21,22,23,24 : 25,26,27,28,29,30,31,32 | 1,2,3,4,5,6,7,8 : 9,10,11,12,13,14,15,16
+do and with 11111111000000001111111100000000 ie ff00ff00 and shift right by 8
+do and with 00000000111111110000000011111111 ie 00ff00ff and shift left by 8
+and or the results of these two
+#25,26,27,28,29,30,31,32 | 17,18,19,20,21,22,23,24 | 9,10,11,12,13,14,15,16 | 1,2,3,4,5,6,7,8
+# or with 11110000111100001111000011110000 ie f0f0f0f0 and shift right by 4 and or with 0f0f0f0f and shift left by 4 and or them 
+29,30,31,32 | 25,26,27,28 | 21,22,23,24 | 17,18,19,20 | 13,14,15,16 |  9,10,11,12 | 5,6,7,8 | 1,2,3,4
+# or with 11001100110011001100110011001100 ie cccccccc and shift right by 2 and or with 33333333 and shift left by 2 and or them 
+31, 32, |  29,30 | 27,28 | 25,26 | 23,24 | 21,22 | 19,20| 17,18 | 15,16| 13,14 | 11,12 |  9,10 |7,8 |  5,6 | 3,4 | 1,2
+# or with 10101010101010101010101010101010 ie aaaaaaaa and shift right by 1 and or with 55555555 and shift left by 1 and or them 
+32 | 31 | 30 | 29 | 28,27 | 26,25 | 24,23 | 22,21 | 20,19| 18,17 | 16,15| 14,13 | 12,11 |  10,9 |8,7 |  6,5 | 4,3 | 2,1
+
+class Solution:
+    def reverseBits(self, n: int) -> int:
+        
+        n = (n << 16) | (n >> 16)
+        
+        n = ((n & 0xff00ff00) >> 8) | (n & 0x00ff00ff) << 8
+        n = ((n & 0xf0f0f0f0) >> 4) | (n & 0x0f0f0f0f) << 4
+        n = ((n & 0xcccccccc) >> 2) | (n & 0x33333333) << 2
+        n = ((n & 0xaaaaaaaa) >> 1) | (n & 0x55555555) << 1
+        
+        return n
