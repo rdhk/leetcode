@@ -33,30 +33,24 @@ class Solution:
  #Traverse array twice without resetting the stack
  [3,8,4,1,2] => [3,8,4,1,2,3,8,4,1,2] => [8,-1,8,2,3]
  
- class Solution:
-    def nextGreaterElements(self, nums: List[int]) -> List[int]:
-        if not nums: return []
-        
-        
-        length = len(nums)
-        results = [-1]*length
-        
-        stack = []
-        for idx in range(length):
+class Solution:
+  def nextGreaterElements(self, nums: List[int]) -> List[int]:
+      if not nums: return []
 
-          while stack and nums[stack[-1]] < nums[idx]:
-            lesser_idx = stack.pop()
-            results[lesser_idx] = nums[idx]
-          stack.append(idx)
-          
-        for idx in range(length):
 
-          while stack and nums[stack[-1]] < nums[idx]:
-            lesser_idx = stack.pop()
-            results[lesser_idx] = nums[idx]
-          stack.append(idx)
-        
-        return results
+      length = len(nums)
+      results = [-1]*length
+
+      stack = []
+      for idx in range(length*2):
+        idx = idx % length
+        while stack and nums[stack[-1]] < nums[idx]:
+          lesser_idx = stack.pop()
+          results[lesser_idx] = nums[idx]
+        stack.append(idx)
+
+
+      return results
         
 
         
