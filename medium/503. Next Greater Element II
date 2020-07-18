@@ -1,0 +1,62 @@
+TC: O(n)
+SC: O(n)
+
+#Method 1 -> The one i thought and applied
+#Find the last idx of the max element in the array, and then start a loop of length from the maxidx, calc the next idx by doing (idx+1)%length
+#This way we kind of rotate the array in a way that the max element will be traversed in the last and it would be the only elem not having the next greater el
+#Then normally use monotonic stack to get the next largest elem(l-> r way)
+#[3,8,4,1,2] => [4,1,2,3,8]
+
+class Solution:
+    def nextGreaterElements(self, nums: List[int]) -> List[int]:
+        if not nums: return []
+        
+        
+        length = len(nums)
+        results = [-1]*length
+        
+        max_idx = nums.index(max(nums))
+        
+        stack = []
+        idx = max_idx + 1) % length
+        for i in range(length):
+          while stack and nums[stack[-1]] < nums[idx]:
+            lesser_idx = stack.pop()
+            results[lesser_idx] = nums[idx]
+          stack.append(idx)
+          idx = (idx + 1) % length
+  
+        
+        return results
+        
+ #Method2:
+ #Traverse array twice without resetting the stack
+ [3,8,4,1,2] => [3,8,4,1,2,3,8,4,1,2] => [8,-1,8,2,3]
+ 
+ class Solution:
+    def nextGreaterElements(self, nums: List[int]) -> List[int]:
+        if not nums: return []
+        
+        
+        length = len(nums)
+        results = [-1]*length
+        
+        stack = []
+        for idx in range(length):
+
+          while stack and nums[stack[-1]] < nums[idx]:
+            lesser_idx = stack.pop()
+            results[lesser_idx] = nums[idx]
+          stack.append(idx)
+          
+        for idx in range(length):
+
+          while stack and nums[stack[-1]] < nums[idx]:
+            lesser_idx = stack.pop()
+            results[lesser_idx] = nums[idx]
+          stack.append(idx)
+        
+        return results
+        
+
+        
