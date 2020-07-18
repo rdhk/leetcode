@@ -1,0 +1,52 @@
+TC: O(n1+n2)
+SC: O(n1+n2)
+
+#left to right traversal
+
+class Solution:
+    def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
+      if not nums1:
+        return []
+      hash_idx = {}
+      for idx, num in enumerate(nums1):
+        hash_idx[num] = idx
+        
+      results = [-1]*len(nums1)
+
+      stack_nums2 = []
+      for idx, num2 in enumerate(nums2):
+        while stack_nums2 and nums2[stack_nums2[-1]] < num2:
+          popped_idx = stack_nums2.pop()
+          popped_num = nums2[popped_idx]
+          
+          if popped_num in hash_idx:
+            results[hash_idx[popped_num]] = num2
+            
+        stack_nums2.append(idx)
+      return results
+      
+#right to left traversal
+class Solution:
+    def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
+      if not nums1: return []
+      hash_nos = {}
+      #stack = [4,]
+      for idx, num in enumerate(nums1):
+        hash_nos[num] = idx
+      
+      results = [-1]*len(nums1)
+      length2 = len(nums2)
+      
+      stack = []
+      for i in range(length2 -1, -1, -1):
+        
+        while stack and nums2[stack[-1]] <= nums2[i]:
+          stack.pop()
+          
+        if nums2[i] in hash_nos and stack:
+          results[hash_nos[nums2[i]]] = nums2[stack[-1]]
+        
+        stack.append(i)
+        
+      return results
+                    
