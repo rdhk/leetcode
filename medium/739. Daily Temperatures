@@ -1,0 +1,60 @@
+#Method 1 -> 
+Maintain a stack, traverse temp from start to end, if you find a lower temp already in stack top, keep popping until temp in stack is lower or stack is empty.
+This denotes all the indexes which have a lower temp than the curr temp and hadnt encountered a higher val until now (and add the diff of indexes in the result)
+Then add the curr idx to the stack.
+Stack will always maintain a decreasing property, ie stack[0] > stack[1] > ..
+or stack[-1] < stack[-2] < stack[-3]
+Values are increasing from top to bottom or decreasing if you see the array order.
+
+TC -> O(T) -> each temp is pushed and pop max once
+SC -> O(T + W) W is temps allowed ie 70-101 since no dups in stack and T is for stack
+
+class Solution:
+    def dailyTemperatures(self, T: List[int]) -> List[int]:
+        length = len(T)
+        stack = []
+        results = [0]*length
+        for i in range(length):
+          while stack and T[i] > T[stack[-1]]:
+            lower_temp_idx = stack.pop()
+            results[lower_temp_idx] = i - lower_temp_idx
+          
+          stack.append(i)
+        return results
+        
+#Method2
+Maintain a stack, traverse the temp from right to left, while there is a top value in stack which is lesser than the current value, pop them(
+because they will not be used by anyone on the left since the curr val will be greater than all values to further right). Then if any value remains in stack 
+which is greater than curr element, then the diff of their indexes is the result ..add in result arr, and also add the current element in the stack.
+
+class Solution:
+    def dailyTemperatures(self, T: List[int]) -> List[int]:
+        length = len(T)
+        stack = []
+        results = [0]*length
+        for i in range(length - 1, -1, -1):
+          while(stack and T[stack[-1]] <= T[i]):
+            stack.pop()
+            
+          if stack: 
+            results[i] = (stack[-1] - i)
+          stack.append(i)
+
+        return results
+        
+#MEthod 3 - Optimised a bit ..no pop push operations
+#We can keep a static array as a stack and top = -1 and manage push pop ops by manipulating top's values.
+class Solution:
+    def dailyTemperatures(self, T: List[int]) -> List[int]:
+        length = len(T)
+        stack = [0]*length
+        results = [0]*length
+        top = -1
+        for i in range(length):
+          while top > -1 and T[i] > T[stack[top]]:
+            lower_temp_idx = stack[top]
+            top -= 1
+            results[lower_temp_idx] = i - lower_temp_idx
+          top += 1
+          stack[top] = i
+        return results
