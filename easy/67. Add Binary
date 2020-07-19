@@ -1,0 +1,61 @@
+Solution 1: Bit by bit add and calc carry like elementary school
+
+TC: O(max(a,b))
+SC: O(max(a,b)) - for result
+
+class Solution:
+    def addBinary(self, a: str, b: str) -> str:
+        "11"
+        "1"
+            
+        len1 = len(a) #2
+        len2 = len(b) #1
+        max_len = max(len1, len2) #2
+        carry = 0 #1
+        result = [] #["0", "0", "1"]
+        
+        curr = 0 #2
+        while(curr < max_len or carry):
+          first = int(a[len1 - 1 - curr]) if curr < len1 else 0 #1
+          second = int(b[len2 - 1 - curr]) if curr < len2 else 0 #0
+          
+          sum = (first + second + carry)
+          sum, carry = sum & 1, sum >> 1
+          # carry, sum = divmod(first + second + carry, 2)
+          result.append(str(sum))          
+          curr += 1
+        result.reverse()
+        return ''.join(result)
+        
+ #Solution 2:
+ #COnvert to ints and perform bit manipulation addition ie result = a_num ^ b_num, carry = (a_num & b_num) << 1
+ # While we have carry, keep adding result and carry in same way
+ # LAter convert int to binary str
+ # TC - O(n+m) to convert n and m to ints,
+ # SC: O(max(n,m)) -> for result str
+ 
+     def addBinary(self, a: str, b: str) -> str:
+            
+        a_num = int(a, 2)
+        b_num = int(b, 2)
+        result = a_num ^ b_num
+        carry = (a_num & b_num) << 1
+        
+        while(carry):
+          result, carry = (result ^ carry), (result & carry) << 1
+          
+        return bin(result)[2:]
+    
+#Further optimisation/refactoring
+    def addBinary(self, a: str, b: str) -> str:
+        "11"
+        "1"
+ 
+        result = int(a, 2)
+        carry = int(b, 2)
+        
+        while(carry):
+          result, carry = (result ^ carry), (result & carry) << 1
+          
+        return bin(result)[2:]
+        
