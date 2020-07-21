@@ -1,0 +1,40 @@
+#Method 1 
+More optimised - Use count sort -> (because we are given a small range of nos 0 to 100), and since we need to count the no of numbers ledd than the current 
+element, the auxillary count array produced in count sort does just that by calc prefix sum after assigning counts of numbers at num idx in count array.
+
+#[8,2,3,1,1,5,3,7,3,7]
+#[0,2,1,3,0,1,0,2,1]
+#[0,2,3,6,6,7,7,9,10]
+#[9,2,3,0,0,6,3,7,3,7]
+TC: n + 100
+SC: 100
+class Solution:
+    def smallerNumbersThanCurrent(self, nums: List[int]) -> List[int]:
+        count_holder = [0]*102
+        
+        for num in nums:
+          count_holder[num+1] += 1
+        
+        for idx in range(1, 102):
+          count_holder[idx] += count_holder[idx-1]
+          
+        for idx, num in enumerate(nums):
+            nums[idx] = count_holder[num]  
+        return nums
+
+# Second approach - Sort the array in a copy array, add the idx of first ecountered num in a count_hash, and then loop through original and assign counts
+#from map to the orig array.
+#TC: nlogn + n
+#SC: n + 100
+class Solution:
+    def smallerNumbersThanCurrent(self, nums: List[int]) -> List[int]:
+      copy_array = nums[::]
+      copy_array.sort()
+      nums_smaller_count_map = {}
+      for idx, num in enumerate(copy_array):
+        if num not in nums_smaller_count_map:
+          nums_smaller_count_map[num] = idx
+      for idx, num in enumerate(nums):
+        nums[idx] = nums_smaller_count_map[num]
+      
+      return nums
