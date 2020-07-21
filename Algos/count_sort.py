@@ -5,7 +5,7 @@ Space Complexity: O(n+k)
 (where k is the range of nos ie (Max_el-Min_el +1))
 Count sort can thus be used with negative nos or where the range of nos (Max - min) is significantly lesser than the size of array (N) by using a appropriate hashing func for index ie (num - min_num)
 Application:
-Can be used for finding the number of elements <= or strictly less than the curr number in array. Leetcode link 
+Can be used for finding the number of elements <= or strictly less than the curr number in array. Leetcode link(https://leetcode.com/problems/how-many-numbers-are-smaller-than-the-current-number/)
 Nums are from range 0 to 100
 
 def count_sort(arr):
