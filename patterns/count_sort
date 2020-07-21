@@ -1,0 +1,5 @@
+Questions:
+  https://leetcode.com/problems/how-many-numbers-are-smaller-than-the-current-number/
+ 
+Pattern:
+  Apply count sort since the range of nos is just 0-100 and also we need to find the count of nos smaller than curr no which is done in count sort intermediate step.
