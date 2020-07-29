@@ -1,0 +1,88 @@
+DFS Recursive
+Mark left and right's next of current node, and then move on to left and right child of current node recursively
+Note that when we move to the left and right ie next level of curr node, curr node's next pointer is already updated, so its accesible while making curr's right next 
+point to curr's next's left pointer
+O(N) TIME AND SPACE
+
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        
+        #null or leaf node, return
+        if not root or (root.left is None and root.right is None):
+          return root
+        
+        #if we come here then both left and right exist(since perfect bt)
+        
+        #change left child's next pointer to right
+        
+        root.left.next = root.right
+        
+        #change left child'd next pointer if root.next exists
+        #left will exists for root.next since its a perfect bt
+        if root.next:
+          root.right.next = root.next.left
+          
+        self.connect(root.left)
+        self.connect(root.right)
+        return root
+        
+        
+BFS iterative
+O(N) TIME AND SPACE
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        
+        #null or leaf node, return
+        queue = collections.deque([])
+        if root:
+          queue.append(root)
+          
+        while(queue):
+          #3,  4,5
+          #none
+          curr_level_len = len(queue)
+          prev = None
+          for i in range(curr_level_len):
+            curr_node = queue.popleft()
+            if curr_node.left:
+  
+              queue.append(curr_node.left)
+              queue.append(curr_node.right)
+            if prev:
+              prev.next = curr_node
+            prev = curr_node
+        return root
+        
+ ITERATIVE(MOST OPTIMISED)
+ O(1) SPACE AND O(N) TIME
+ class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        
+        #null or leaf node, return
+        if not root: return None
+        curr_level_leftmost = root
+        
+        #this means there is a next level to change next pointers of
+        while(curr_level_leftmost.left):
+          temp = curr_level_leftmost
+          
+          while temp:
+            #set next level left's next
+            temp.left.next = temp.right
+            #set next level right's next only if temp.next exists
+            if temp.next:
+              temp.right.next = temp.next.left
+            temp = temp.next
+          curr_level_leftmost = curr_level_leftmost.left  
+              
+        return root
