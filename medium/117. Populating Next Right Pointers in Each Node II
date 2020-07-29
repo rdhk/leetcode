@@ -1,0 +1,42 @@
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+
+O(n) Time and O(1) Space
+#Can be done using BFS as well , that would consume extra space
+# Iteratively, we can iterate the curr level like a linked list(since its next pointers have already been updated by the prev level iteration)
+# We can keep leftmost in child level and a prev pointer too, and whenever we encounter a left or right child or curr node, we can update prev and leftmost pointer
+#and make prev.next point to curr child if prev already exists
+#After a single level is fully traversed, we start new iteration from leftmost child which belongs to next level.
+
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        
+        
+        def link_prev_to_next(next, prev, curr_leftmost):
+            if next:
+              if curr_leftmost is None:
+                curr_leftmost = next
+              else:
+                prev.next = next
+              prev = next
+            return prev, curr_leftmost
+        
+        #leaf node or null node
+        curr_leftmost = root
+        while(curr_leftmost):
+          temp = curr_leftmost
+          
+          prev = curr_leftmost = None
+          
+          while(temp):
+            prev, curr_leftmost = link_prev_to_next(temp.left, prev, curr_leftmost)
+            prev, curr_leftmost = link_prev_to_next(temp.right, prev, curr_leftmost)
+            temp = temp.next
+        return root
