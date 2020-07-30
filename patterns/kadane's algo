@@ -1,0 +1,45 @@
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock/
+
+https://leetcode.com/problems/maximum-subarray/
+
+These both questions follow the same pattern, ie Kadane's Algorithm, where we are required to find the maximum subarray sum.
+
+Why it works:
+  Suppose we have a series of negative and positive nos, such that we club all negative occuring together into one negative and then positives together,
+  like P N P N, or N P N P or
+  
+  Then we would never be starting or ending with a negative, as it would make our sum more negative, and also we would be only taking a negative into consideration
+  when that negative is lesser than both positives on left and right, like 7 -3 4 = 8
+  
+  If we had a num like 2 -3 4, we would have just taken 4 instead
+  So, the moment our running sum becomes negative, we should no longer consider it, and reset running sum to 0
+  And until out running sum is +ve, we still have hope of increasing our sum, so keep adding in running sum, and keep upating global sum = max(global sum, running_sum)
+  so that we dont miss any higher max subarray encountered before
+  
+  
+  https://leetcode.com/problems/best-time-to-buy-and-sell-stock/
+  Eg [7,4,5,2,3,8,1,11,0,13]
+  Our goal is to pick the smallest valley(low) occuring before the highest peak(high) ie 0, 13
+This can be looked like an array of differences between consecutive day stock prices. If any day the stock price is lesser then what we bought at(min_until_now changes), we would 
+ rather buy it at that price rather than making our profit negative).
+ 
+ if prices are p1,p2,p3,p4,p5 we want to find pa and pb such that pa < pb and a < b and the difference between them is max.
+ Now, pa - pb, if they are eg p2 and p5, can be written as,
+ (p3 - p2) + (p4-p3) + (p5 - p4) = (p5 - p2)
+ so we should find max subarray sum
+ 
+ 
+ class Solution:
+      
+      
+    def maxProfit(self, prices: List[int]) -> int:
+      profit_curr = 0
+      for i in range(1, len(prices)):
+        price_diff = (prices[i] - prices[i-1])
+        #whenever we encounter some number < curr_min, this will become -ve
+        if profit_curr + price_diff < 0:
+          profit_curr = 0
+        else:
+          profit_curr += price_diff
+        max_profit = max(max_profit, profit_curr)
+      return max_profit
