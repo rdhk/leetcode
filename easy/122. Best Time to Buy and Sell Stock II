@@ -1,7 +1,8 @@
 #MEthod 1 -> Peak and valley -> Find all peaks and valleys -> and add the sums obtained from each peak valley diff -> we should not skip a peak for a bigger peak
 Eg v1 = 3, p1 = 10, v2 = 9, p2 = 11
 P = 7 + 2 as opposed to 8 if we missed selling at p1 () 
-![image](https://user-images.githubusercontent.com/8983984/88948768-f46b3d80-d2af-11ea-9b0a-483c088f7a01.png)
+https://user-images.githubusercontent.com/8983984/88948768-f46b3d80-d2af-11ea-9b0a-483c088f7a01.png
+Here A + B will always be > C, becuase of overlapping space between A and B
 
 class Solution:
     def maxProfit(self, prices: List[int]) -> int:
