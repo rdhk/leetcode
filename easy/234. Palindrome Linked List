@@ -1,0 +1,71 @@
+#time - O(n), space - O(n) - rec stack
+Method 1 - Recursion
+class Solution:
+    def isPalindrome(self, head: ListNode) -> bool:
+        
+        length = 0
+        temp = head
+
+        def is_palindrome(start, curr):
+          if start >= half_index:
+            #odd
+            if odd:
+              return (True, curr.next)
+            elif curr is None:
+              return (True, None)
+            else:
+              return(curr.val == curr.next.val, curr.next.next)
+          
+          is_inner_palin, tail = is_palindrome(start + 1, curr.next)
+          
+          return (is_inner_palin and curr.val == tail.val, tail.next)
+          
+        #length = 4
+
+
+        while(temp):
+          length += 1
+          temp = temp.next
+        half_index, odd =  ceil(length/2), length & 1
+          
+        return is_palindrome(1, head)[0]
+        
+  Method 2: Palindrome second half and compare with first
+  # Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+#time - O(n), space - O(n) - rec stack
+class Solution:
+    def isPalindrome(self, head: ListNode) -> bool:
+      if not head or not head.next: return True
+      #d->1->2->2->2->1
+      def palindrome(head):
+        temp = head
+        prev = None
+        while(temp):
+          next = temp.next
+          temp.next = prev
+          prev = temp
+          temp = next
+        return prev
+      
+      dummy = ListNode('*', head)
+      fast, slow = dummy, dummy
+      
+      while(fast and fast.next):
+        fast = fast.next.next
+        slow = slow.next
+      
+      
+      second_half = palindrome(slow.next)
+      slow.next = None
+      
+      while(head and second_half):
+        if head.val != second_half.val:
+          return False
+        head = head.next
+        second_half = second_half.next
+      return True
