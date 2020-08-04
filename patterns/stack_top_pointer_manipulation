@@ -1,0 +1,35 @@
+https://leetcode.com/problems/validate-stack-sequences/
+
+For the Space efficient approach, we used the current array only as a stack, by moving the top pointers forwards and backwards. This didnt require us to use extra space for stack
+
+Optimised Space:
+#PATTERN? Instead of creating a stack, use the given pushed array as a stack with top pointer, keep reducing top to pop and incrementing top to push
+
+TC: O(n) max 2n push and pop operations
+SC: O(1)
+
+https://github.com/rdhk/leetcode/blob/master/medium/946.%20Validate%20Stack%20Sequences
+
+
+class Solution:
+    def validateStackSequences(self, pushed: List[int], popped: List[int]) -> bool:
+
+        pop_ptr = 0
+        top = 0
+        for push in pushed:
+            #similar to append
+            pushed[top] = push
+            
+            #keep reducing top, like popping from stack until stack exists and value in popped is same
+            while(top >= 0 and pushed[top] == popped[pop_ptr]):
+              top -= 1
+              pop_ptr += 1
+            top += 1
+          
+        #denotes stack became empty
+        #we can also use pop_ptr == length
+        return top == 0
+
+
+#Can also be used to prevent popping and pushing , instead just move the top , more efficient, uses 2 pointers
+
