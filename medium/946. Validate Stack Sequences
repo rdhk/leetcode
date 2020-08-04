@@ -1,0 +1,50 @@
+#Simulate stack operations, until you find the popped element, keep pushing in stack, keep popping until top of stack is same as popped element,
+if not, push next element
+In the end stack should be empty or popped pointer == length
+
+TC: O(n) max 2n push and pop operations
+SC: O(n) for stack
+
+class Solution:
+    def validateStackSequences(self, pushed: List[int], popped: List[int]) -> bool:
+        
+        stack = []
+        
+        # push_ptr = 0
+        pop_ptr = 0
+        length = len(popped)
+        for push_ptr in range(length):
+            stack.append(pushed[push_ptr])
+    
+            while(stack and stack[-1] == popped[pop_ptr]):
+              stack.pop()
+              pop_ptr += 1
+          
+        return pop_ptr == length
+
+
+
+Optimised Space:
+#PATTERN? Instead of creating a stack, use the given pushed array as a stack with top pointer, keep reducing top to pop and incrementing top to push
+
+TC: O(n) max 2n push and pop operations
+SC: O(1)
+
+class Solution:
+    def validateStackSequences(self, pushed: List[int], popped: List[int]) -> bool:
+
+        pop_ptr = 0
+        top = 0
+        for push in pushed:
+            #similar to append
+            pushed[top] = push
+            
+            #keep reducing top, like popping from stack until stack exists and value in popped is same
+            while(top >= 0 and pushed[top] == popped[pop_ptr]):
+              top -= 1
+              pop_ptr += 1
+            top += 1
+          
+        #denotes stack became empty
+        #we can also use pop_ptr == length
+        return top == 0
