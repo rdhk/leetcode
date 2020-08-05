@@ -1,0 +1,63 @@
+#Backtracking or DFS with Trie Ds
+#TC: O(26^L) - Search
+O(L) - Insertion
+#SC: O(L1 + L2..+ Ln)
+
+T(L) = 26T(L-1) + O(1)
+a = 26, b= 1, A^(L/B) = 26^L (L is length of search word)
+
+While searching, keep track of curr node and start index, if '.', choices are children of curr trie node, if not ., it should match exacty, if not possible, return false
+
+class TrieNode:
+  def __init__(self):
+    self.children = collections.defaultdict(TrieNode)
+    self.is_end = False
+
+class WordDictionary:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.root = TrieNode()
+        
+
+    def addWord(self, word: str) -> None:
+        """
+        Adds a word into the data structure.
+        """
+        curr_node = self.root
+        for letter in word:
+          curr_node = curr_node.children[letter]
+        curr_node.is_end = True
+    
+    def backtrack(self, curr_node, start, word):
+      
+      if start == len(word):
+        return curr_node.is_end
+      
+      exists = False
+      if word[start] == '.':
+        for letter in curr_node.children:
+          exists = self.backtrack(curr_node.children[letter], start + 1, word)
+          if exists: break
+          
+      elif word[start] in curr_node.children:
+        exists = self.backtrack(curr_node.children[word[start]], start+1, word)
+
+      return exists
+        
+      
+    def search(self, word: str) -> bool:
+        """
+        Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter.
+        """
+        
+        return self.backtrack(self.root, 0, word)
+        
+
+
+# Your WordDictionary object will be instantiated and called as such:
+# obj = WordDictionary()
+# obj.addWord(word)
+# param_2 = obj.search(word)
