@@ -1,0 +1,55 @@
+
+#Approach 1 - Reverse whole string, then first k and last (n-k) individually
+class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        if not k: return
+        def reverse(start, end):
+          while(start < end):
+            nums[start], nums[end] = nums[end], nums[start]
+            start += 1
+            end -= 1
+         
+        k = k % len(nums)
+        reverse(0, len(nums) - 1)
+        
+        reverse(0, k-1)
+        reverse(k, len(nums) - 1)
+        
+ #approach 2 -> Shift by k in cycles, if k is and length and not coprime, then when cycle repeats, start rotating from last start + 1, until no of replaced elements dont equal length
+class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        if not k: return
+        k = k % len(nums)
+        
+        count = 0
+        length = len(nums)
+        start = 0
+        local_start_idx = start #0
+        while(count < length):
+          
+          curr_idx = (local_start_idx + k) % length #3
+          temp = nums[local_start_idx] #1
+          while curr_idx != local_start_idx:
+            # temp = nums[curr_idx]
+            nums[curr_idx], temp = temp, nums[curr_idx]
+            curr_idx = (curr_idx + k) % length
+            count += 1
+          
+          nums[curr_idx] = temp
+          count += 1
+          
+          local_start_idx = (local_start_idx + 1) % length
+        
+            
+          
+        
+        
+        
+        
+ 
