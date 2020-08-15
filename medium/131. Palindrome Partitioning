@@ -1,0 +1,171 @@
+Approach 1: Backtracking
+
+#One thing to note here is atelast one soln exists because atleast every char is a palindrome by itself
+#Following above, if current substr is a plaindrome, we'll always find a palindrome in the remaining substr because each letter is a palindrome itself
+#So, question boils down to finding all possible valid palindrom partitions in current substr, and add them to the curr result, and recurse on rem substr to find remaining valid palindrome partitions
+#To find if current substr is a valid palind, have a func that checks if curr substr is a palindrome, by expanding the substr one char each time
+
+#"aab"
+  a,a,b
+  a,ab(not palind, return from posn 1, ie a)
+  aa(valid palindrome), b
+  aab(not palin, return)
+#aabbad
+  a,a,b,b,a,d
+  ad not palin, ba not palin, bad not palin,
+  a,a, bb(palin), a,d
+  bba(no), bbad(no), 
+  aa(palin), b,b,a,d
+  aa,bb,a,d
+  aab(no), aabb(no), aabba(no), aabbad(no)
+
+class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+      
+      length = len(s)
+      
+      def is_palin(start, end):
+        
+        if start > end: return False
+        
+        while(start < end):
+          if s[start] != s[end]:
+            return False
+          start += 1
+          end -= 1
+        return True
+      
+      def backtrack(start):
+        
+        if start == length:
+          results.append(curr_result[::])
+          return
+        
+        for i in range(start, length):
+          if s[i] == s[start] and is_palin(start, i):
+            curr_result.append(s[start: i+1])
+            backtrack(i + 1)
+            curr_result.pop()
+      
+      curr_result = []
+      results = []
+      backtrack(0)
+      return results
+      
+      #recursion
+      #a + partitions(ab)
+      #a + a + partitions(b)
+      #a + a + b
+      #aa + partitions(b)
+      #aab
+      
+      #dp?
+      
+      #aabbad
+      
+      #aabb
+      #a + partitions(abb)
+      #a + a + p(bb)
+      #a + a + b + p(b)
+      #a + a + b + b
+      #a+ a + bb + p(0)
+      #a + ab?
+      
+      #abcdeeo
+      #a,b,c,d,e,e,d
+      #a,b,c,d,"ee", d
+      #a,b,c,"deed"
+      #ab
+      
+Approach 2:
+Pure DP
+At each level, find valid palin and keep adding the palin possible in remaining substring
+Also, keep caching index results, so that they are not recomputed
+
+from functools import lru_cache 
+
+class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+      
+      length = len(s)
+      
+      def is_palin(start, end):
+        
+        if start > end: return False
+        
+        while(start < end):
+          if s[start] != s[end]:
+            return False
+          start += 1
+          end -= 1
+        return True
+      
+      @lru_cache
+      def get_partitions(start):
+        if start == length:
+          return [[]]
+
+        partitions = []
+        for end in range(start, length):
+          if is_palin(start, end):
+            curr_partition = [s[start: end+1]]
+            remaining_str_palin_partitions = get_partitions(end + 1)
+            
+            for rem_partition in remaining_str_palin_partitions:
+              partitions.append(curr_partition[::])
+              if rem_partition:
+                partitions[-1].extend(rem_partition)
+        return partitions
+      
+      return get_partitions(0)
+      
+      
+Approach 3:
+In first go, find all palin possible at each level. And then do a backtracking on those possible palindromes at each level
+
+from functools import lru_cache 
+
+class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+      
+      length = len(s)
+      
+      def is_palin(start, end):
+        
+        if start > end: return False
+        
+        while(start < end):
+          if s[start] != s[end]:
+            return False
+          start += 1
+          end -= 1
+        return True
+      
+      palindromes_at_index = [[] for i in range(length)]
+      
+      for start in range(length):
+        for end in range(start, length):
+          if is_palin(start, end):
+            palindromes_at_index[start].append(s[start: end+1])
+            
+      
+            
+      # print(palindromes_at_index)
+      results = []
+      curr_result = []
+      
+      def backtrack(start):
+        if start == length:
+          results.append(curr_result[:])
+          return
+        
+        for palin in palindromes_at_index[start]:
+          curr_result.append(palin)
+          backtrack(start + len(palin))
+          curr_result.pop()
+        
+      backtrack(0)
+      
+      return results
+      
+      
