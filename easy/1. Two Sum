@@ -1,0 +1,42 @@
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        #O(n^2)
+        
+        for i in range(len(nums)):
+          to_find = target - nums[i]
+          for j in range(i+1, len(nums)):
+            if nums[j] == to_find:
+              return (i, j)
+        
+        #O(nlogn) tc and O(n) extra space
+        sorted_array = [(num, idx) for idx, num in enumerate(nums)]
+        sorted_array.sort()
+        
+        
+        i, j = 0, len(nums) - 1
+        
+        while(i < j):
+          if sorted_array[i][0] + sorted_array[j][0] == target:
+            return (sorted_array[i][1], sorted_array[j][1])
+          elif sorted_array[i][0] + sorted_array[j][0] < target:
+            i += 1
+          else:
+            j -= 1
+
+        #O(n) time and O(n) extra space - Two pass
+        hash_table = {num: idx for idx, num in enumerate(nums)}
+    
+        for idx, num in enumerate(nums):
+          if target - num in hash_table and hash_table[target - num] != idx:
+            return (idx, hash_table[target - num])
+          
+        #O(n) time and O(n) extra space - One pass
+        
+        hash_table = {}
+        for idx, num in enumerate(nums):
+          if target-num in hash_table:
+            return (hash_table[target-num], idx)
+          else:
+            hash_table[num] = idx
+          
+        
