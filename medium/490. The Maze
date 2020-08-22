@@ -1,0 +1,145 @@
+#DFS/ BFS with only end points in dir used to compare if dest reached, and also to mark visited.
+#Dont mark intermediate points visited, because there can be valid paths to dest through those intermediate points, and also we havent explored all the dirs from that point.
+
+#TC: O(m*n*(m+n)) - because max we'll visit all points, and to find next point, we have to make m+n moves in all dirs combined
+#SC: O(m*n) - for queue or stack or rec stack
+
+
+#DFS Recursive
+
+        #[
+        #[0,0,1,*,*],
+        #[*,0,0,*,*],
+        #[*,0,*,1,*],
+        #[1,1,0,1,1],
+        #[*,0,*,0,*]
+        #]
+        #[0,4]
+        #[4,4]
+
+class Solution:
+    def hasPath(self, maze: List[List[int]], start: List[int], destination: List[int]) -> bool:
+    
+        if start[0] == destination[0] and start[1] == destination[1]:
+          return True
+        
+        def mark_visited(cell):
+          nonlocal maze
+          maze[cell[0]][cell[1]] = -1
+          
+        def last_cell_in_dir_unvisited(start, dir):
+          x = start[0]
+          y = start[1]
+          
+          while( 0 <= x + dir[0] < len(maze) and 0 <= y + dir[1] < len(maze[0]) and maze[x + dir[0]][y + dir[1]] != 1):
+            
+            x += dir[0]
+            y += dir[1]
+
+          return (x,y), maze[x][y] != -1
+            
+        
+        found_dest = False
+        mark_visited(start)
+        
+
+        for dir in ((0,-1), (0,1), (-1,0), (1,0)):
+          last_cell, unvisited = last_cell_in_dir_unvisited(start, dir)
+          if unvisited:
+            found_dest = self.hasPath(maze, last_cell, destination)
+            if found_dest:
+              break
+              
+        return found_dest
+        
+  #DFS Iterative
+  class Solution:
+    def hasPath(self, maze: List[List[int]], start: List[int], destination: List[int]) -> bool:
+        
+        def mark_visited(cell):
+          nonlocal maze
+          maze[cell[0]][cell[1]] = -1
+          
+        def last_cell_in_dir(start, dir):
+          x = start[0]
+          y = start[1]
+          
+          while( 0 <= x + dir[0] < len(maze) and 0 <= y + dir[1] < len(maze[0]) and maze[x + dir[0]][y + dir[1]] != 1):    
+            x += dir[0]
+            y += dir[1]
+            
+          return (x,y)
+            
+        
+        found_dest = False
+        
+        stack = []
+        stack.append(start)
+        
+        while(stack):
+          start = stack.pop()
+          
+          if maze[start[0]][start[1]] == -1:
+            continue
+            
+          if start[0] == destination[0] and start[1] == destination[1]:
+            return True
+          
+          mark_visited(start)
+          for dir in ((0,-1), (0,1), (-1,0), (1,0)):
+            last_cell = last_cell_in_dir(start, dir)
+            stack.append(last_cell)
+              
+        return found_dest
+        
+  BFS Iterative
+  class Solution:
+        #queue - [Q, O, S]
+    
+        #A* B* 1 C* D*
+        #E* F G* H* I*
+        #J* K* L* 1  M*
+        #1 1 N 1 1
+        #O* P Q* R S*
+        
+        #[0,4]
+        #[4,4]
+    def hasPath(self, maze: List[List[int]], start: List[int], destination: List[int]) -> bool:
+        
+        def mark_visited(cell):
+          nonlocal maze
+          maze[cell[0]][cell[1]] = -1
+          
+        def last_cell_in_dir(start, dir):
+          x = start[0]
+          y = start[1]
+          
+          while( 0 <= x + dir[0] < len(maze) and 0 <= y + dir[1] < len(maze[0]) and maze[x + dir[0]][y + dir[1]] != 1):    
+            x += dir[0]
+            y += dir[1]
+            
+          return (x,y)
+        
+        queue = collections.deque([start])
+        mark_visited(start)
+        while(queue):
+          start = queue.popleft()
+
+          for dir in ((0,-1), (0,1), (-1,0), (1,0)):
+            
+            last_cell = last_cell_in_dir(start, dir)
+            #if already visited, skip
+            if maze[last_cell[0]][last_cell[1]] == -1:
+              continue
+            if last_cell[0] == destination[0] and last_cell[1] == destination[1]:
+              return True
+            mark_visited(last_cell)
+            queue.append(last_cell)
+              
+        return False
+          
+        
+        
+          
+        
+        
