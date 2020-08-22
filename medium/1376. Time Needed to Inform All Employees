@@ -1,0 +1,64 @@
+#We need to find the max possible time among all the leaf nodes
+#For that, do a dfs/ bfs, passing the time elapsed to reach that employee, and while adding in queue/stack, add the time the curr employee will take to 
+#inform its subordinates.
+#The max time among these will be the max time taken
+#**** We dont need a visited array, because we'll never have a back edge, or edge from any other employee to current employee, because an employee can only be subordinate 
+#of a single manager
+
+#BFS Approach
+
+class Solution:
+    def numOfMinutes(self, n: int, headID: int, manager: List[int], informTime: List[int]) -> int:
+      #create a subordinates list to avoid O(n) time search on every manager possible
+
+      subordinates = collections.defaultdict(list)
+      #subordinates = {-1: [2], 2: [3], 3: [0,1]}
+      #queue = [(0,a+b), (1, a + b)]
+      #max = 914
+
+      for idx, mgr in enumerate(manager):
+        subordinates[mgr].append(idx)
+
+      max_time_to_inform = 0
+      queue = collections.deque([])
+      queue.append((headID, 0))
+
+      while(queue):
+        curr_employee,  time_to_inform_them = queue.popleft()
+        max_time_to_inform = max(max_time_to_inform, time_to_inform_them)
+
+        time_to_inform_subord = time_to_inform_them + informTime[curr_employee]
+        
+        for subord in subordinates[curr_employee]:
+            queue.append((subord, time_to_inform_subord))
+
+      return max_time_to_inform
+      
+ #Exactly same as BFS, use stack instead of queue
+  class Solution:
+    def numOfMinutes(self, n: int, headID: int, manager: List[int], informTime: List[int]) -> int:
+      #create a subordinates list to avoid O(n) time search on every manager possible
+
+      subordinates = collections.defaultdict(list)
+      #subordinates = {-1: [2], 2: [3], 3: [0,1]}
+      #queue = [(0,a+b), (1, a + b)]
+      #max = 914
+
+      for idx, mgr in enumerate(manager):
+        subordinates[mgr].append(idx)
+
+      max_time_to_inform = 0
+      stack =[]
+      # queue = collections.deque([])
+      stack.append((headID, 0))
+
+      while(stack):
+        curr_employee,  time_to_inform_them = stack.pop()
+        max_time_to_inform = max(max_time_to_inform, time_to_inform_them)
+
+        time_to_inform_subord = time_to_inform_them + informTime[curr_employee]
+        
+        for subord in subordinates[curr_employee]:
+            stack.append((subord, time_to_inform_subord))
+
+      return max_time_to_inform
