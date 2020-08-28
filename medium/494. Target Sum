@@ -1,0 +1,123 @@
+Approach 1: Inspired from educative - BOTTOM UP 0-1 Knapsack
+# if we have first group of positive integers(where we add + sign) sum as s1, then second group will be with -ve sign, ie s2 ie total_sum - s1.
+so, s1 - s2 = target_sum => s1 - (total_sum - s1) = target_sum => 2s1 = target_sum + total_sum => s1 = ( target + total_sum )//2
+if ( target + total_sum ) is odd, its not possible to have a s1 and s2 with sum as target. So if its odd, return 0, else do a 0-1 Knapsack on sum of subsets = s1.
+Ie. no of ways you can form a sum of s1 from first i elements by including ith element and not including ith element.
+
+
+class Solution:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        
+        total_sum = sum(nums)
+        if (total_sum + S) & 1 or S > total_sum:
+          return 0
+        
+        req_sum_subsets = (total_sum + S) // 2
+        
+        # prev_ways_to_make_sum = [0]*(req_sum_subsets+1)
+        # prev_ways_to_make_sum[0] = 1
+        
+        #{}[1,0,0,0,0]
+        #1 [1,1,0,0,0]
+        #1 [1,2,1,0,0]
+        #1 [1,3,3,1,0]
+        #1 [1,4,6,4,1]
+        #1 [1,5,10,10,5]
+        curr_ways_to_make_sum  = [0]*(req_sum_subsets+1)
+        curr_ways_to_make_sum[0] = 1
+        #dp[i][s] represents how many ways we can make sum s from first i elements
+        for num in nums:
+          for s in range(req_sum_subsets, -1, -1):
+            
+            curr_ways_to_make_sum[s] = curr_ways_to_make_sum[s] + (0 if num > s else curr_ways_to_make_sum[s-num])
+
+          # curr_ways_to_make_sum, prev_ways_to_make_sum = prev_ways_to_make_sum, curr_ways_to_make_sum
+          
+        return curr_ways_to_make_sum[req_sum_subsets]
+          
+          
+    Approach 2: Top down - not diff to understand
+    Once use +ve sign, next use -ve sign , and pass the rem sum to next idx
+    When all elements used or assigned signs, and rem_sum == 0, that means that sum can be formed by that signs combination
+    
+    TOP DOWN:
+    
+ class Solution:
+  
+    def find_target_sum_ways_rec(self, offset, nums, idx, req_sum):
+      
+      if idx == len(nums):
+        return 1 if req_sum == 0 else 0
+      
+      if self.cache[idx][offset+req_sum] == -1:
+      
+        ways_with_plus = self.find_target_sum_ways_rec(offset, nums, idx+1, req_sum - nums[idx])
+
+        ways_with_minus = self.find_target_sum_ways_rec(offset, nums, idx+1, req_sum + nums[idx])
+        self.cache[idx][offset+req_sum] = ways_with_plus + ways_with_minus
+      
+      return self.cache[idx][offset+req_sum]
+    
+    
+    
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        
+        #two choices, consider it as + or -
+        total_sum = sum(nums)
+        
+        #min and max sum possible is -total to +total
+        if not -total_sum <= S <= total_sum:
+          return 0
+        
+        # -2,-1,0,1,2,3,4,5,6,7,8
+        self.cache = [[-1 for i in range(S-total_sum, S+total_sum + 1)] for j in range(len(nums))]
+        
+        offset = -(S-total_sum)
+        return self.find_target_sum_ways_rec(offset, nums, 0, req_sum=S)
+        
+          
+          
+        
+        
+    
+    
+    Bottom UP
+    
+    class Solution:
+    
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        
+        #two choices, consider it as + or -
+        total_sum = sum(nums)
+        
+        #min and max sum possible is -total to +total
+        if not -total_sum <= S <= total_sum:
+          return 0
+        
+        
+        offset = -(S-total_sum)
+        
+        prev = [0 for i in range(S-total_sum, S+total_sum + 1)]
+        prev[offset] = 1
+        
+        minimum = S - total_sum
+        maximum = S + total_sum
+        
+        curr = [0]*(2*total_sum + 1)
+        for i in range(len(nums)):
+          for curr_sum in range(S-total_sum, S+total_sum + 1):
+            
+            ways_positive = ways_negative = 0
+            # use + ve sign
+            if curr_sum - nums[i] >= minimum:
+              ways_positive = prev[offset + curr_sum - nums[i]]
+              
+            #use -ve sign
+            if curr_sum + nums[i] <= maximum:
+              ways_negative = prev[offset + curr_sum + nums[i]]
+            curr[offset + curr_sum] = ways_positive + ways_negative 
+
+          curr, prev = prev, curr
+          
+        return prev[offset+S]
+        
