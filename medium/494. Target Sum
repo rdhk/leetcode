@@ -83,6 +83,11 @@ class Solution:
     
     Bottom UP
     
+    This just means init a cache with length target - total sum to target + total sum, and sum = 0 can be formed in 1 ways
+    
+    then for each num, find how many ways we can form the curr sum if we use it as neg or positive integer, 
+    ans will be the no of ways we can form target sum from first i elements.
+    
     class Solution:
     
     def findTargetSumWays(self, nums: List[int], S: int) -> int:
