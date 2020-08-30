@@ -1,0 +1,87 @@
+Approach:
+
+Was not able to understand the solution initially.
+Some few assumptions we need to make.
+Since we are not given a starting point, we can assume our starting point to be 0,0 such that the axis system is built around it.
+So, it can go left, right, up, down..and we our x and y will become positive negative accordingly.
+
+We need to perform dfs, but the robot is blind and we are just given 4 api's , turn left, right, move and clean.
+If we have already cleaned a cell, we'll mark it visited, and explore all 4 dir's from that cell.
+In addition to performing a dfs, we also need to actually move the robot, using apis, and turn using apis.
+
+
+When a cell is surrounded by all visited cells/obstacles, at that point we need to backtrack.
+So backtrack logic is like, for the robot, after exploring all 4 dirs, robot would have turned right 4 times, so it would be pointing in the same dirn as it entered the cell.
+Now, to backtrack, it need to turn reverse, 180 degrees, ie two rights, move one cell(from where it came initially) and then again 180 degrees turn, to be at same dirn
+as the one it was before going to last cell. When this is done, the robot can explore other dirs of prev cell by turning right and then exploring that dirn if its possible
+
+Also keep making cell coordinates change according to dirn, and to simulate a clockwise turning dirn behaviour, use mod to get next dirn.
+
+T(n) = 4T(n-1) + O(1)
+TC: 4^(total_cells - obstacles)
+SC: O(total_cells - obstacles) for visited set and recursion stack
+
+# """
+# This is the robot's control interface.
+# You should not implement it, or speculate about its implementation
+# """
+#class Robot:
+#    def move(self):
+#        """
+#        Returns true if the cell in front is open and robot moves into the cell.
+#        Returns false if the cell in front is blocked and robot stays in the current cell.
+#        :rtype bool
+#        """
+#
+#    def turnLeft(self):
+#        """
+#        Robot will stay in the same cell after calling turnLeft/turnRight.
+#        Each turn will be 90 degrees.
+#        :rtype void
+#        """
+#
+#    def turnRight(self):
+#        """
+#        Robot will stay in the same cell after calling turnLeft/turnRight.
+#        Each turn will be 90 degrees.
+#        :rtype void
+#        """
+#
+#    def clean(self):
+#        """
+#        Clean the current cell.
+#        :rtype void
+#        """
+
+class Solution:
+  
+  
+    def dfs(self, robot, cell, dir=0):
+      robot.clean()
+      self.visited.add(cell)
+      
+      for i in range(4):
+        new_dir = (dir + i) % 4
+        new_cell = (cell[0] + self.dirs[new_dir][0], cell[1] + self.dirs[new_dir][1])
+        
+        if new_cell not in self.visited and robot.move():
+          self.dfs(robot, new_cell, dir=new_dir)
+          
+        robot.turnRight()
+      robot.turnRight()
+      robot.turnRight()
+      robot.move()
+      robot.turnRight()
+      robot.turnRight()
+        
+      
+    def cleanRoom(self, robot):
+        """
+        :type robot: Robot
+        :rtype: None
+        """
+        self.visited = set()
+        self.dirs = {0: (1, 0), 1: (0,1), 2: (-1, 0), 3: (0,-1)}
+        self.dfs(robot, (0,0), dir=0)
+
+        
