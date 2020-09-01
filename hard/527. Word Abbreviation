@@ -1,0 +1,147 @@
+Approach: 
+The key point here is to find that only the words which have same start, end and length, can have conflicting abbreviations, others can not.
+So, group them by same length, start and end char.
+When that is done, we can directly add abbreviations of words which are not conflicting directly to result.
+For cinflicting ones, we can use below two approaches:
+
+Approach1:
+Sorting + least common prefix
+For each conflicting word group, sort the list of words.
+Note that words adjacent to each other after sorting are likely to have common prefixes except first char if any.
+Keep calc the common prefix length for each word and its prev word, for any word to make the abbr unique, its prefix length should be max of longest prefix length
+with the left and right words both. So, lcp[i-1] = max(lcp[i-1], lcp[i]) or lcp[i] = max(lcp(curr, prev), lcp(curr, next))(handle corner words)
+Eg ['inception','intension' 'intrusion'] - inception and intension will have max 2 letters in common and intention and intrusion will have 3 letters in common.
+So inception - use first 2+1 letters for prefix of abbr to make it unique
+intention- use 3+1 letters to make it unique, 
+intrusion - use 3+1 to make unique
+
+TC: O(W) to map words to length, chars group
+In worst case, all have same length and first last char, ie 400 words with 400 chars, 
+O(W*C*logW) for sorting words
+O(C*W) for calc lcp and adding abbr in result
+So, dominating term is O(W*C*logW)
+
+SC: O(WC) - for conflicting words sorted and result, O(W) for map
+
+
+class Solution:
+    def wordsAbbreviation(self, dict: List[str]) -> List[str]:
+      result = [None]*len(dict)
+        
+      def find_abbreviation(word):
+        abbreviated_length = len(word) - 2
+        if abbreviated_length > 1:
+          return word[0] + str(abbreviated_length) + word[-1]
+        else:
+          return word
+      
+      def calc_lcp(w1, w2):
+        p = 0
+        while(p < len(w1) and w1[p] == w2[p]):
+          p += 1
+          
+        return p
+          
+      
+      def resolve_conflicts(words):
+        lcp = [0]*len(words)
+        for idx, (word, word_idx) in enumerate(words):
+          if idx > 0:
+            lcp[idx] = calc_lcp(words[idx][0], words[idx - 1][0])
+            lcp[idx - 1] = max(lcp[idx - 1], lcp[idx])
+            
+        for idx, (word, word_idx) in enumerate(words):
+          pre_len = lcp[idx]
+          result[word_idx] = word[:pre_len] + find_abbreviation(word[pre_len:])
+        
+      #same prefix + suffix + same length
+      
+      length_boundary_chars_idx_map = collections.defaultdict(lambda: collections.defaultdict(list))
+      
+      for idx, word in enumerate(dict):
+        length = len(word)
+        length_boundary_chars_idx_map[length][(word[0], word[-1])].append(idx)
+        
+      for length in length_boundary_chars_idx_map:
+        for word_idxs in length_boundary_chars_idx_map[length].values():
+          if len(word_idxs) == 1:
+            word_idx = word_idxs.pop()
+            result[word_idx] = find_abbreviation(dict[word_idx])
+          else:
+            words = list(map(lambda idx: (dict[idx], idx), word_idxs))
+            words.sort()
+            resolve_conflicts(words)
+            
+            
+            
+      return result
+      
+Approach 2:
+Alternatively we can use trie to find the longest prefix which is unique to identify a word.
+Create a trie of conflicting words, then keep incresing count of prefix char as every new word is added.
+For each word, traverse trie until count_words_with_this_prefix = 1, then add till prev char to the abbr and abbreviate the rem word
+
+TC: O(W) - map/group words
+O(W*C) to create trie
+O(W*C) to find the lcp
+SO TC: O(WC) where c is longest word length and w is no of words
+
+SC: O(WC) for result and trie + O(W) for map of idxs
+      
+class TrieNode:
+  def __init__(self):
+    self.children = collections.defaultdict(TrieNode)
+    self.counts = 0
+    
+
+class Solution:
+    def wordsAbbreviation(self, dict: List[str]) -> List[str]:
+      result = [None]*len(dict)
+        
+      def find_abbreviation(word):
+        abbreviated_length = len(word) - 2
+        if abbreviated_length > 1:
+          return word[0] + str(abbreviated_length) + word[-1]
+        else:
+          return word
+      
+      def resolve_conflicts(word_idxs):
+        trie_node = TrieNode()
+        
+        for word_idx in word_idxs:
+          curr = trie_node
+          for char in dict[word_idx]:
+            curr = curr.children[char]
+            curr.counts += 1
+        
+        for word_idx in word_idxs:
+          curr = trie_node
+          prefix_unique_count = 0
+          for idx, char in enumerate(dict[word_idx]):
+            curr = curr.children[char]
+            prefix_unique_count += 1
+            if curr.counts == 1:
+              break
+          
+          result[word_idx] = dict[word_idx][:prefix_unique_count - 1] + find_abbreviation(dict[word_idx][prefix_unique_count - 1:])
+            
+        
+      #same prefix + suffix + same length
+      
+      length_boundary_chars_idx_map = collections.defaultdict(lambda: collections.defaultdict(list))
+      
+      for idx, word in enumerate(dict):
+        length = len(word)
+        length_boundary_chars_idx_map[length][(word[0], word[-1])].append(idx)
+        
+      for length in length_boundary_chars_idx_map:
+        for word_idxs in length_boundary_chars_idx_map[length].values():
+          if len(word_idxs) == 1:
+            word_idx = word_idxs.pop()
+            result[word_idx] = find_abbreviation(dict[word_idx])
+          else:
+            resolve_conflicts(word_idxs)
+            
+            
+            
+      return result
