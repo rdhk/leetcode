@@ -1,0 +1,63 @@
+Approach:
+
+A = [4,7,9,10], K = 1
+
+no of missing nos until an idx i can be found by 
+
+total_nums = A[i] - A[0] + 1
+total_nos_present = i + 1
+total_nos_missing = total_nums - total_nos_present
+
+do a binary search, if no of missing nos until idx >= K, we need to go left ie right = mid - 1
+if no of missing nos until idx < K, then set left = mid, to obtain the max idx which has missing nos < K
+
+When such index if found, just add (K-missing_nos_until_idx) to the nums[idx] to obtain the kth missing no
+
+TC: logn
+SC: 1
+
+class Solution:
+    def missingElement(self, nums: List[int], k: int) -> int:
+        
+        leftmost_num = nums[0]
+        
+        left, right = 0, len(nums) - 1
+        #find the idx which is just lesser than the kth missing no.
+        
+        missing_nums = 0
+        while(left < right):
+          mid = left + ((right - left + 1) >> 1)
+          total_nums_until_mid = nums[mid] - leftmost_num + 1
+          missing_nums = total_nums_until_mid - (mid+1)
+          if missing_nums >= k:
+            right = mid - 1
+          else:
+            left = mid
+            
+        total_nos_until_left = nums[left] - leftmost_num + 1
+        missing_nums_until_left = total_nos_until_left - (left+1)
+        mising_nums_rem = k - missing_nums_until_left
+        
+        return nums[left] + mising_nums_rem
+        
+        
+ More concise
+ 
+ class Solution:
+    def missingElement(self, nums: List[int], k: int) -> int:
+        
+        left, right = 0, len(nums) - 1
+        #find the idx which has missing nos just lesser than the k.
+        
+        def missing_until_idx(idx):
+          return nums[idx] - nums[0] - idx
+          
+        while(left < right):
+          mid = left + ((right - left + 1) >> 1)
+
+          if missing_until_idx(mid) >= k:
+            right = mid - 1
+          else:
+            left = mid
+        
+        return nums[left] + k - missing_until_idx(left)
