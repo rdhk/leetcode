@@ -1,0 +1,49 @@
+'''
+Knuth-Morris-Pratt (KMP)
+
+
+
+'''
+
+class Solution:
+    def strStr(self, haystack: str, needle: str) -> int:
+        if not needle: return 0
+        if not haystack: return -1
+        
+        def create_lps_table(string):
+            prefixes = [0] * len(needle) 
+            j = 0
+            for i in range(1, len(needle)):
+              while(j > 0 and needle[j] != needle[i]):
+                j = prefixes[j-1]
+                
+              if needle[j] == needle[i]:
+                prefixes[i] = j+1
+                j += 1
+                
+            return prefixes
+            
+        lps = create_lps_table(needle) # O(m)
+
+        #abcaby -> 
+        #000120
+        #abxabcabcaby
+        
+        p, s = 0, 0
+        while(p < len(needle) and s < len(haystack)):
+          
+          while(p > 0 and haystack[s] != needle[p]):
+            p = lps[p-1]
+          if haystack[s] == needle[p]:
+            p += 1
+          s += 1 
+
+          
+        if p == len(needle):
+          return s - p 
+        else:
+          return -1
+
+
+#TC: O(n + m) 
+
