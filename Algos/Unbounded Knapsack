@@ -69,3 +69,120 @@ Add max_len contributing to profit at each rod_len while calc the max_profit. an
 0:00:00.000078 - top down
 14
 0:00:00.000064 - bottom up
+
+COIN CHANGE
+
+BRUTE FORCE
+
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+      
+      
+      def coin_change_rec(amt_rem, idx_start):
+        if amt_rem == 0: 
+          return 1
+        
+        if idx_start >= len(coins) or amt_rem < 0:
+          return 0
+
+        
+        total_ways = 0
+        for coin_idx in range(idx_start, len(coins)):
+          total_ways += coin_change_rec(amt_rem - coins[coin_idx], coin_idx)
+          
+        return total_ways
+      
+
+      return coin_change_rec(amount, 0)
+      
+  OR
+  class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+      
+      def possible_ways_rec(rem_amount, start_idx):
+        
+        if rem_amount == 0:
+          return 1
+        
+        if start_idx >= len(coins) or rem_amount < 0: 
+          return 0
+        
+        ways_excluding = possible_ways_rec(rem_amount, start_idx + 1)
+        
+        ways_including = 0
+        if coins[start_idx] <= rem_amount:
+          ways_including = possible_ways_rec(rem_amount - coins[start_idx], start_idx)
+          
+        return ways_including + ways_excluding
+      
+      return possible_ways_rec(amount, 0)
+        
+	
+TOP DOWN
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+      
+      def possible_ways_rec(rem_amount, start_idx):
+        nonlocal cache
+        if rem_amount == 0:
+          return 1
+        
+        if start_idx >= len(coins) or rem_amount < 0: 
+          return 0
+        
+        if cache[start_idx][rem_amount] == -1:
+          
+          ways_excluding = possible_ways_rec(rem_amount, start_idx + 1)
+
+          ways_including = 0
+          if coins[start_idx] <= rem_amount:
+            ways_including = possible_ways_rec(rem_amount - coins[start_idx], start_idx)
+          cache[start_idx][rem_amount] = ways_excluding + ways_including
+          
+        return cache[start_idx][rem_amount]
+      
+      cache = [[-1]*(amount +1) for idx in range(len(coins))]
+      return possible_ways_rec(amount, 0)
+      
+ BOTTOM UP
+ 
+ class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+        
+        
+        
+        cache = [[0]*(amount + 1) for i in range(len(coins) + 1)]
+        
+        cache[0][0] = 1
+        
+        for coin_idx in range(1, len(coins) + 1):
+          for amt in range(amount + 1):
+            
+            cache[coin_idx][amt] += cache[coin_idx - 1][amt]
+            if coins[coin_idx - 1] <= amt:
+              cache[coin_idx][amt] += cache[coin_idx][amt - coins[coin_idx-1]]
+              
+        return cache[len(coins)][amount]
+           
+	   
+BOTTOM UP SPACE OPTIMISED
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+        
+        
+        
+        cache = [[0]*(amount + 1) for i in range(len(coins) + 1)]
+        
+        prev = [0]*(amount + 1)
+        curr = [0]*(amount + 1)
+        prev[0] = 1
+        
+        for coin_idx in range(len(coins)):
+          for amt in range(amount + 1):
+            curr[amt] = prev[amt]
+            if coins[coin_idx] <= amt:
+              curr[amt] += curr[amt - coins[coin_idx]]
+          prev, curr = curr, prev
+              
+        return prev[amount]
+        
