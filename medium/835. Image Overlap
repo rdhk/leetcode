@@ -1,0 +1,101 @@
+APPROACH:
+My naive approach was to place each starting 1 of A on each starting 1 of B, and then check how many one's overlap by checking the delta of each set point in a and 
+comparing it with same delta in B if that points is set. Although it resulted in TLE, becuase TC was 
+O(nsq*nsq*nq) = n^6
+
+class Solution:
+    def largestOverlap(self, A: List[List[int]], B: List[List[int]]) -> int:
+        
+        max_overlap = 0
+        
+        set_points_A = set()
+        set_points_B = set()
+        
+        for row in range(len(A)):
+          for col in range(len(A[0])):
+            if A[row][col]:
+              set_points_A.add((row, col))
+            if B[row][col]:
+              set_points_B.add((row, col))
+        
+        if not len(set_points_A) or not len(set_points_B):
+          return 0
+        
+        #place first point of A on every points of B and count overlaps
+        if len(set_points_B) > len(set_points_A):
+          set_points_B, set_points_A = set_points_A, set_points_B
+          
+        for start_xa, start_ya in set_points_A:
+          for start_xb, startyb in set_points_B:
+            current_overlap_points = 0
+            for xa_point, ya_point in set_points_A:
+              delta_x_a, delta_y_a = xa_point - start_xa, ya_point - start_ya
+              
+              if (start_xb + delta_x_a, startyb + delta_y_a) in set_points_B:
+                current_overlap_points += 1
+            max_overlap = max(max_overlap, current_overlap_points)
+            
+        return max_overlap
+        
+#This approach took me more time to understand, first we need to find the set points in image1 and image2.
+Then , for each point in A, which transforms to B, takes (x,y) ie xb-xa, yb-ya transforms to become the set point in B.
+All the points which will have the same transform dist from A to B, are the ones which can be transformed from A to B sucessfully.
+Eg A is [[1,0,0], 
+         [0,1,0],
+         [0,1,0]
+        ]
+B is    [[1,0,0], 
+         [0,0,1],
+         [0,0,1]
+        ]
+   Max overlaps is 2 , ie lower 2 from first and lower 2 from second.
+   lets call 3 set points in A as a1,a2,a3 and in B as b1,b2,b3
+   now, to get a1-> b1 - (0,0) change
+                  ->b2 - (1,2) change
+                  ->b3 - (2,2) change
+                  
+              a2 -> b1 - (-1,-1) change
+                  -> b2 -> (0,1)
+                  -> b3 - (1,1) 
+              
+              a3 -> b1 - (-1,-2) change
+                 -> b2 -> (-1,1)
+                 -> b3 - (0,1)
+                 
+             Now, only a2 -> b2 and a3 -> b3 have (0,1) tranformations required. So, when image is shifted by (0,1) ie 1 posn right,
+             image A becomes 
+        [
+         [0,1,0], 
+         [0,0,1],
+         [0,0,1]
+        ]
+  This has exactly two overlaps, given by the count of (0,1) in transforms map, it means, when an image is shifted, all points will transform by same delta, so
+  the maximum no of points from A to B with same delta is the no of overlaps that will happen when u shift the image by that delta. 
+
+class Solution:
+    def largestOverlap(self, A: List[List[int]], B: List[List[int]]) -> int:
+        
+        max_overlap = 0
+        
+        set_points_A = set()
+        set_points_B = set()
+        
+        for row in range(len(A)):
+          for col in range(len(A[0])):
+            if A[row][col]:
+              set_points_A.add((row, col))
+            if B[row][col]:
+              set_points_B.add((row, col))
+        
+        #place first point of A on every points of B and count overlaps
+        
+        transform_req_vector_map = collections.defaultdict(int)
+        for start_xa, start_ya in set_points_A:
+          for start_xb, startyb in set_points_B:
+            tranform_req = (start_xb - start_xa, startyb - start_ya)
+            transform_req_vector_map[tranform_req] += 1
+ 
+            max_overlap = max(max_overlap, transform_req_vector_map[tranform_req])
+            
+        return max_overlap
+        
