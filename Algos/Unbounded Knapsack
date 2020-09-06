@@ -186,3 +186,117 @@ class Solution:
               
         return prev[amount]
         
+	
+COIN CHANGE: MIN COINS TO MAKE CHANGE
+
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        
+        def min_coins_recur(rem_amount):
+          # print(rem_amount)
+          if rem_amount == 0:
+            return 0
+          if rem_amount < 0:
+            return float(inf)
+          
+          min_coins_req = float(inf)
+          
+          for coin in coins:
+            min_coins_req = min(min_coins_req, min_coins_recur(rem_amount - coin))
+
+            
+          return 1 + min_coins_req
+          
+        min_coins = min_coins_recur(amount)
+        return -1 if min_coins == float(inf) else min_coins
+	
+TOP DOWN
+
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        
+        def min_coins_recur(rem_amount):
+          # print(rem_amount)
+          if rem_amount == 0:
+            return 0
+          if rem_amount < 0:
+            return float(inf)
+          
+          if cache[rem_amount] == -1:
+            
+            min_coins_req = float(inf)
+
+            for coin in coins:
+              min_coins_req = min(min_coins_req, min_coins_recur(rem_amount - coin))
+            cache[rem_amount] = 1 + min_coins_req
+            
+          return cache[rem_amount]
+        
+        cache = [-1]*(amount + 1)
+        min_coins = min_coins_recur(amount)
+        return -1 if min_coins == float(inf) else min_coins
+	
+	BOTTOM UP DP
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        
+        cache = [0]*(amount + 1)
+        
+        for amt in range(1, amount + 1):
+          min_coins_for_amt = float(inf)
+          for coin in coins:
+            if coin <= amt:
+              min_coins_for_amt = min(min_coins_for_amt, cache[amt - coin])
+          cache[amt] = 1 + min_coins_for_amt
+            
+        return -1 if cache[amount] == float(inf) else cache[amount]
+	
+BRUTE FORCE
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+      
+      #Unbounded Knapsack
+      def min_coins_recur(rem_amount, start_idx):
+        
+        if rem_amount == 0:
+          return 0
+        
+        if rem_amount < 0 or start_idx >= len(coins):
+          return float(inf)
+        
+        min_coins_excluding_curr = min_coins_recur(rem_amount, start_idx + 1)
+        min_coins_including_curr = float(inf)
+        
+        if coins[start_idx] <= rem_amount:
+          min_coins_including_curr = 1 + min_coins_recur(rem_amount - coins[start_idx], start_idx)
+          
+        return min(min_coins_including_curr, min_coins_excluding_curr)
+      
+      coins_min = min_coins_recur(amount, 0)
+      return -1 if coins_min == float(inf) else coins_min 
+      
+ TOP DOWN:
+ class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+      
+      #Unbounded Knapsack
+      def min_coins_recur(rem_amount, start_idx):
+        nonlocal cache
+        if rem_amount == 0:
+          return 0
+        
+        if rem_amount < 0 or start_idx >= len(coins):
+          return float(inf)
+        
+        if cache[start_idx][rem_amount] == -1:
+          min_coins_excluding_curr = min_coins_recur(rem_amount, start_idx + 1)
+          min_coins_including_curr = float(inf)
+
+          if coins[start_idx] <= rem_amount:
+            min_coins_including_curr = 1 + min_coins_recur(rem_amount - coins[start_idx], start_idx)
+          cache[start_idx][rem_amount] = min(min_coins_including_curr, min_coins_excluding_curr)
+        return cache[start_idx][rem_amount]
+      
+      cache = [[-1 for amt in range(amount + 1)] for start_idx in range(len(coins))]
+      coins_min = min_coins_recur(amount, 0)
+      return -1 if coins_min == float(inf) else coins_min
