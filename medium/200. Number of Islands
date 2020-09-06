@@ -1,0 +1,272 @@
+DFS Recursive
+
+T(n) = 4T(n-1) + O(1)
+
+class Solution:
+  def numIslands(self, grid: List[List[str]]) -> int:
+        
+    if not grid or not grid[0]: return 0
+    rows , cols = len(grid), len(grid[0])
+        
+    dirs = ((0,1), (0, -1), (1,0), (-1, 0)) #these denote all possible neighbours 
+    
+    def dfs(x, y):
+        grid[x][y] = "V"
+        for delta_x, delta_y in dirs:
+            new_x, new_y =  x + delta_x, y + delta_y 
+            if  0 <= new_x < rows and 0 <= new_y < cols and grid[new_x][new_y] == "1":
+                dfs(new_x, new_y)
+          
+    components = 0
+    for row in range(rows):
+        for col in range(cols):
+            #this means unvisited
+            if grid[row][col] == "1":
+                components += 1
+                dfs(row, col)
+        
+    return components
+    
+DFS Iterative
+
+class Solution:
+  def numIslands(self, grid: List[List[str]]) -> int:
+        
+    if not grid or not grid[0]: return 0
+    rows , cols = len(grid), len(grid[0])
+        
+    dirs = ((0,1), (0, -1), (1,0), (-1, 0)) #these denote all possible neighbours 
+    
+#   ["V","V","V","V","0"],
+#   ["","V","0","V","0"],
+#   ["V","V","0","0","0"],
+#   ["0","0","0","0","0"]
+# ]
+    
+    def dfs_iter(x,y):
+        stack = [(x,y)]
+        
+        while(stack):
+          x, y = stack.pop()
+          #mark visited
+          if grid[x][y] == "V":
+            continue
+          grid[x][y] = "V"
+          for delta_x, delta_y in dirs:
+              new_x, new_y =  x + delta_x, y + delta_y 
+              if  0 <= new_x < rows and 0 <= new_y < cols and grid[new_x][new_y] == "1":
+                  stack.append((new_x, new_y))
+    
+    
+    components = 0
+    for row in range(rows):
+        for col in range(cols):
+            #this means unvisited
+            if grid[row][col] == "1":
+              components += 1
+              dfs_iter(row, col)
+        
+    return components
+    
+BFS
+
+class Solution:
+  def numIslands(self, grid: List[List[str]]) -> int:
+        
+    if not grid or not grid[0]: return 0
+    rows , cols = len(grid), len(grid[0])
+        
+    dirs = ((0,1), (0, -1), (1,0), (-1, 0)) #these denote all possible neighbours 
+    
+#   ["V","V","V","V","0"],
+#   ["","V","0","V","0"],
+#   ["V","V","0","0","0"],
+#   ["0","0","0","0","0"]
+# ]
+    
+    def bfs(x,y):
+        queue = collections.deque([(x,y)])
+        grid[x][y] = "V"
+        
+        while(queue):
+          x, y = queue.popleft()
+          
+          for delta_x, delta_y in dirs:
+              new_x, new_y =  x + delta_x, y + delta_y 
+              if  0 <= new_x < rows and 0 <= new_y < cols and grid[new_x][new_y] == "1":
+                  grid[new_x][new_y] = "V"
+                  queue.append((new_x, new_y))
+    
+    
+    components = 0
+    for row in range(rows):
+        for col in range(cols):
+            #this means unvisited
+            if grid[row][col] == "1":
+              components += 1
+              bfs(row, col)
+        
+    return components
+    
+    
+UNION FIND
+class UnionFind:
+  def __init__(self, grid):
+    self.rows = len(grid)
+    self.cols = len(grid[0])
+    self.parents = [-1]*(self.rows*self.cols)
+  
+  def get_linear_coords(self, point):
+    return point[0]*self.cols + point[1]
+  
+  def find(self, idx):
+    
+    root = idx
+    
+    while(self.parents[root] >= 0):
+      root = self.parents[root]
+    
+    while(self.parents[idx] >= 0):
+      temp_parent = self.parents[idx]
+      self.parents[idx] = root
+      idx = temp_parent
+    
+    return root, abs(self.parents[root])
+      
+      
+    
+  def union(self, point1, point2):
+    idx1, idx2 = self.get_linear_coords(point1), self.get_linear_coords(point2)
+    parent1, rank1 = self.find(idx1)
+    parent2, rank2 = self.find(idx2)
+    
+    if parent1 == parent2:
+      return 
+    
+    if rank2 > rank1:
+      parent1, parent2 = parent2, parent1
+      rank1, rank2 = rank2, rank1
+      
+    self.parents[parent2] = parent1
+    self.parents[parent1] -= rank2
+    
+  def is_root(self, point):
+    return self.parents[self.get_linear_coords(point)] < 0
+
+UNION FIND 1
+    
+class Solution:
+  def numIslands(self, grid: List[List[str]]) -> int:
+        
+    if not grid or not grid[0]: return 0
+    rows , cols = len(grid), len(grid[0])
+        
+    dirs = ((0,1), (1,0)) #these denote only right and down dirs
+    
+    def perform_union(x,y):
+        nonlocal uf
+        for delta_x, delta_y in dirs:
+          new_x, new_y =  x + delta_x, y + delta_y
+            
+          if  0 <= new_x < rows and 0 <= new_y < cols and grid[new_x][new_y] == "1":
+              uf.union((x,y), (new_x, new_y))
+    #[-4,0, -1, -1,-1,     0,0,-1,-1,-1,   -1, -1,-1,-1,-1,     -1,-1, -1,-2,0]
+    components = 0
+    uf = UnionFind(grid)
+    for row in range(rows):
+        for col in range(cols):
+            #this means unvisited
+            if grid[row][col] == "1":
+              perform_union(row, col)
+            
+    for row in range(rows):
+        for col in range(cols):
+            #this means unvisited
+            if grid[row][col] == "1":
+              components += int(uf.is_root((row, col)))
+
+    return components
+    
+UNION FIND 2
+class UnionFind:
+  def __init__(self, grid):
+    self.rows = len(grid)
+    self.cols = len(grid[0])
+    self.parents = [-1]*(self.rows*self.cols)
+  
+  def get_linear_coords(self, point):
+    return point[0]*self.cols + point[1]
+  
+  def find(self, idx):
+    
+    root = idx
+    
+    while(self.parents[root] >= 0):
+      root = self.parents[root]
+    
+    while(self.parents[idx] >= 0):
+      temp_parent = self.parents[idx]
+      self.parents[idx] = root
+      idx = temp_parent
+    
+    return root, abs(self.parents[root])
+      
+      
+    
+  def union(self, point1, point2):
+    idx1, idx2 = self.get_linear_coords(point1), self.get_linear_coords(point2)
+    parent1, rank1 = self.find(idx1)
+    parent2, rank2 = self.find(idx2)
+    
+    if parent1 == parent2:
+      return False
+    
+    if rank2 > rank1:
+      parent1, parent2 = parent2, parent1
+      rank1, rank2 = rank2, rank1
+      
+    self.parents[parent2] = parent1
+    self.parents[parent1] -= rank2
+    return True
+    
+  def is_root(self, point):
+    return self.parents[self.get_linear_coords(point)] < 0
+
+      
+    
+class Solution:
+  def numIslands(self, grid: List[List[str]]) -> int:
+        
+    if not grid or not grid[0]: return 0
+    rows , cols = len(grid), len(grid[0])
+        
+    dirs = ((0,1), (1,0)) #these denote only right and down dirs
+    
+    def perform_union(x,y):
+        nonlocal uf, components
+        for delta_x, delta_y in dirs:
+          new_x, new_y =  x + delta_x, y + delta_y
+            
+          if  0 <= new_x < rows and 0 <= new_y < cols and grid[new_x][new_y] == "1":
+              union_occurred = uf.union((x,y), (new_x, new_y))
+              components -= int(union_occurred)
+    #[-4,0, -1, -1,-1,     0,0,-1,-1,-1,   -1, -1,-1,-1,-1,     -1,-1, -1,-2,0]
+    components = 0
+    uf = UnionFind(grid)
+    for row in range(rows):
+        for col in range(cols):
+            #this means unvisited
+            
+            if grid[row][col] == "1":
+              components += 1
+              perform_union(row, col)
+            
+    # for row in range(rows):
+    #     for col in range(cols):
+    #         #this means unvisited
+    #         if grid[row][col] == "1":
+    #           components += int(uf.is_root((row, col)))
+
+    return components
+    
+
