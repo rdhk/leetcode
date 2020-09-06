@@ -300,3 +300,124 @@ class Solution:
       cache = [[-1 for amt in range(amount + 1)] for start_idx in range(len(coins))]
       coins_min = min_coins_recur(amount, 0)
       return -1 if coins_min == float(inf) else coins_min
+      
+    
+ 
+Maximum ribbon cut - (like min coin change)
+We are given a ribbon of length ‘n’ and a set of possible ribbon lengths. Now we need to cut the ribbon into the maximum number of pieces that comply with the above-mentioned possible lengths. Write a method that will return the count of pieces.
+
+Example 1:
+
+n: 5
+Ribbon Lengths: {2,3,5}
+Output: 2
+Explanation: Ribbon pieces will be {2,3}.
+Example 2:
+
+n: 7
+Ribbon Lengths: {2,3}
+Output: 3
+Explanation: Ribbon pieces will be {2,2,3}.
+Example 3:
+
+n: 13
+Ribbon Lengths: {3,5,7}
+Output: 3
+Explanation: Ribbon pieces will be {3,3,7}.
+
+import datetime
+
+def max_length_brute_force(length, ribbon_lengths):
+
+
+  def max_len_recur(rem_length, start_idx):
+    if rem_length == 0:
+      return 0
+
+    if start_idx == len(ribbon_lengths) or rem_length < 0:
+      return float('-inf')
+
+    excluding_current = max_len_recur(rem_length, start_idx + 1)
+    including_current = float('-inf')
+    if ribbon_lengths[start_idx] <= rem_length:
+      including_current =  1 + max_len_recur(rem_length - ribbon_lengths[start_idx], start_idx)
+
+    # print(rem_length, start_idx, excluding_current, including_current)
+    return max(excluding_current, including_current)
+
+  if not length or not ribbon_lengths:
+    return 0
+
+  return max_len_recur(length, 0)
+  
+def max_length_top_down(length, ribbon_lengths):
+
+
+  def max_len_recur(rem_length, start_idx):
+    nonlocal cache
+    if rem_length == 0:
+      return 0
+
+    if start_idx == len(ribbon_lengths) or rem_length < 0:
+      return float('-inf')
+
+    if cache[start_idx][rem_length] == -1:
+
+      excluding_current = max_len_recur(rem_length, start_idx + 1)
+      including_current = float('-inf')
+      if ribbon_lengths[start_idx] <= rem_length:
+        including_current =  1 + max_len_recur(rem_length - ribbon_lengths[start_idx], start_idx)
+      cache[start_idx][rem_length] = max(excluding_current, including_current)
+
+    # print(rem_length, start_idx, excluding_current, including_current)
+    return cache[start_idx][rem_length]
+
+  cache = [[-1]*(length+1) for idx in range(len(ribbon_lengths))]
+  if not length or not ribbon_lengths:
+    return 0
+
+  return max_len_recur(length, 0)
+
+
+def max_length_bottom_up_dp(length, ribbon_lengths):
+
+  cache = [float('-inf')]*(length + 1)
+  #zero length can be made with 0 pieces
+  #not possible to make length 1,2,3..etc with one or more pieces, so -inf
+  cache[0] = 0
+  #[0,-,-,1,-,-,-,-,-,-,-,-,-,-]
+  3
+  for ribbon_len in ribbon_lengths:
+    for length_curr in range(length + 1):
+      if ribbon_len <= length_curr:
+        #prev is cache[length_curr] - ie if we dont use current piece
+        cache[length_curr] = max(cache[length_curr], 1 + cache[length_curr - ribbon_len])
+  return cache[length]
+
+old_time = datetime.datetime.now()
+print(max_length_brute_force(200 , [3,5,7]))
+
+new_time = datetime.datetime.now()
+print((new_time - old_time).total_seconds()*1000)
+old_time = datetime.datetime.now()
+
+print(max_length_top_down(200 , [3,5,7]))
+
+new_time = datetime.datetime.now()
+print((new_time - old_time).total_seconds()*1000)
+
+old_time = datetime.datetime.now()
+
+print(max_length_bottom_up_dp(200
+ , [3,5,7]))
+
+new_time = datetime.datetime.now()
+print((new_time - old_time).total_seconds()*1000)
+
+66
+162.378
+66
+7.518000000000001
+66
+4.809
+
