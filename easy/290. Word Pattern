@@ -1,0 +1,60 @@
+NAIVE APPROACH:
+Use a hashmap to store char -> word mapping, and a set of used words to ensure if word is not being mapped to two chars.
+In the end, also need to ensure that both p and s are at end.
+class Solution:
+    def wordPattern(self, pattern: str, str: str) -> bool:
+        
+        word_ptr = 0
+        start_ptr = 0
+        char_word_map = {}
+        words_already_mapped = set()
+        for idx, char in enumerate(pattern):
+
+          while word_ptr < len(str) and str[word_ptr] != ' ':
+            word_ptr += 1
+            
+          word = str[start_ptr: word_ptr]
+          
+          if char in char_word_map and word != char_word_map[char]:
+            return False
+          if char not in char_word_map and word in words_already_mapped:
+            return False
+          
+          char_word_map[char] = word
+          words_already_mapped.add(word)
+          start_ptr = word_ptr + 1
+          word_ptr = word_ptr + 1
+          if word_ptr >= len(str):
+            break
+
+          
+        return word_ptr >= len(str) and idx == len(pattern) - 1
+
+
+BETTER APPROACH: Map both char and word to the first idx if they are not present in hash, if they are same later, then keep going, else if a char matched to 
+another word before, its idx < the new words indx, if a word matched to another char before, its idx will be lesser than new char idx.
+This was also used in isomorphic strings question, to diff word and char, add a prefix to it as well
+class Solution:
+    def wordPattern(self, pattern: str, str: str) -> bool:
+        
+        word_ptr = 0
+        start_ptr = 0
+        char_word_idx_map = {}
+        
+        words = str.split(' ')
+        if len(words) != len(pattern):
+          return False
+        
+        for idx, char in enumerate(pattern):
+          
+          char_key = ('1' + char)
+          word_key = ('2' + words[idx])
+          if char_key not in  char_word_idx_map:
+            char_word_idx_map[char_key] = idx
+          if word_key not in char_word_idx_map:
+            char_word_idx_map[word_key] = idx
+            
+          if char_word_idx_map[char_key] != char_word_idx_map[word_key]:
+            return False
+          
+        return True
