@@ -1,0 +1,73 @@
+Approach:
+Brute force approach is the only approach here.
+Try to make the first letter map to first char, and do a dfs
+
+while dfs, if u find a pattern char equal to prev char, then u must have same word mapped to the pattern char, if next l letters are not same, this
+mapping cant give us a valid solution.
+
+If char is not already in mapping, we need to see if we can make curr letter map to curr char, we also need to check if that word is not already mapped to some other char
+
+if mapped, try the next combination of word, and see if it results is a match in whole string
+if at any point p reaches last length along with word, not before, not after, then we have successfully matched pattern
+
+One really good optimisation in this was, only make curr word combinations upto str_rem - pattern_rem index, because we atelast need 1 char in future for each char rem in pattern
+this reduces time from 204 - 208 ms ie 1/10th
+
+TC: 
+choices at each level(a) = (str - pattern)
+worst case 1 letter is removed at each recursion, so b = 1
+Work done at each level = 1 + 2 + ...((str - pattern)) = (str - pattern)^2
+max depth = length of pattern
+
+so TC: (str - pattern)^2 * (str - pattern)^length of pattern = (str - pattern)^(length of pattern + 2)
+SC: to store max pattern + str length in mapping and set + pattern recursion stack
+
+
+class Solution:
+    def wordPatternMatch(self, pattern: str, str: str) -> bool:
+        
+        mapping = {}
+        #{a:xyzabcxzyabc }
+        used_words = set()
+        if not pattern and not str: return True
+        if not pattern or not str: return False
+        def backtrack(str_idx, pattern_idx):
+          
+          #Base case
+          if str_idx == len(str) or pattern_idx == len(pattern):
+            return str_idx == len(str) and pattern_idx == len(pattern)
+          
+          
+          #if char already mapped to a word, try to match it and proceed further, else return false
+          pattern_char = pattern[pattern_idx]
+          if pattern_char in mapping:
+
+            expected_word = mapping[pattern_char]
+            expected_len = len(expected_word)
+            next_word = str[str_idx: str_idx + expected_len]
+            if next_word == expected_word:
+              return backtrack(str_idx + expected_len, pattern_idx + 1)
+            else:
+              return False
+          
+          pattern_found = False
+          
+          pattern_rem = len(pattern) - pattern_idx - 1
+          for end_word_idx in range(str_idx+1, len(str) - pattern_rem + 1):
+            word_mapped = str[str_idx: end_word_idx]
+            if word_mapped not in used_words:
+              mapping[pattern_char] = word_mapped
+              used_words.add(word_mapped)
+              pattern_found = backtrack(end_word_idx, pattern_idx + 1)
+              if pattern_found:
+                break
+              del mapping[pattern_char]
+              used_words.remove(word_mapped)
+            
+          return pattern_found
+        
+        return backtrack(0,0)
+            
+        
+        
+        
