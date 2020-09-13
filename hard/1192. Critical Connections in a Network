@@ -1,0 +1,38 @@
+class Solution:
+    def criticalConnections(self, n: int, connections: List[List[int]]) -> List[List[int]]:
+        
+        
+        adj_list = collections.defaultdict(list)
+        
+        for server1, server2 in connections:
+          adj_list[server1].append(server2)
+          adj_list[server2].append(server1)
+          
+        critical_connections = []
+
+        time = 0
+        times = {}
+        
+        def dfs(curr, parent):
+          nonlocal critical_connections, time
+
+          times[curr] = [time, time]
+          time += 1
+          
+          for neighbour in adj_list[curr]:
+            if neighbour == parent:
+              continue
+            #back edge
+            elif neighbour in times:
+              times[curr][1] = min(times[curr][1], times[neighbour][1])
+            #totally unvisited neighbour
+            else:
+              dfs(neighbour, curr)
+              #low time of unvisited neighbour > curr discovery time indicates that if current edge is removed, there is no link from neigbour to a ancestor of curr node, so its a critical edge
+              if times[neighbour][1] > times[curr][0]:
+                critical_connections.append([curr, neighbour])
+              else:
+                times[curr][1] = min(times[curr][1], times[neighbour][1])
+        
+        dfs(0, None)
+        return critical_connections
