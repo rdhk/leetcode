@@ -1,0 +1,54 @@
+'''
+This is like evaluating an expression like basic calculator
+"3[a2[c]]4[abc]"
+
+Its like doing a dfs
+
+keep preparing the number formed by digits(if its a digit) , when digit ends, add it to a stack of nums
+then add the current char in stack of chars, until you encounter a closing brace, 
+a closing brace means pop out elements from char stack until there'an an opening brace uncountered. 
+Then pop the corresponding top number from number stack and multiply string that many times.
+Then add result string in char stack and again continue doing the above steps.
+In the end, join all chars in the char stack to get final str
+
+Time and space complexity -  O(n) and O(n), 
+In worst case
+'''
+
+
+class Solution:
+    def decodeString(self, s: str) -> str:
+        
+        stack = []
+        stack_digits = []
+        curr_digit = 0
+        digits = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '0')
+        for char in s:
+          
+          if char in digits:
+            curr_digit = curr_digit*10 + int(char)
+            
+          elif char == ']':
+            
+            string_in_brace = collections.deque([])
+            while(stack[-1] != '['):
+              string_in_brace.appendleft(stack.pop())
+            
+            stack.pop()
+            times = stack_digits.pop()
+            
+            stack.append((''.join(string_in_brace))*times)
+            
+            
+          else:
+            if curr_digit > 0:  
+              stack_digits.append(curr_digit)
+              curr_digit = 0
+              
+            stack.append(char)
+        return ''.join(stack)
+            
+            
+            
+            
+            
