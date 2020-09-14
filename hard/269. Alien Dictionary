@@ -1,0 +1,203 @@
+
+
+
+'''
+Crux of the problem is to make a graph from given words
+Note that the words with same prefix and the letter which differentiates them, defines a sequence eg wrt and wrf - same prefix, t -> f and wrf and er, w -> e
+
+So, either we can build a trie, and record the order of children with same prefixes as edges in a dependency graph.
+
+
+Or, another way we can look at it is since strings are lexicographically sorted, we only everytime need to compare the first differing chars between every adjacent string. This is because since they are sorted, they will always have the longest common prefix between them already.
+
+so wrt -> wrf (t->f) and ett, rftt (e->r)
+
+Some edge cases to consider:
+
+  what if there is a back edge, ie a cycle, eg z, x, z 
+  In case of a trie, we can add a check while adding children that the new char either has to be a new child, or the last child already present in curr trie node's child, this is because otherwise we will have an cycle in our graph
+  
+  in case of adjacent differing letters, we can detect the cycle in top sort
+  
+  if string is like zzx and then zz , then its wrong, although the prefix of them will be exactly same, still the second string cannot be longer, becuase in normal dictionary, after abb, ab cannot occur. 
+  So in case of trie, if after a word traversal , some previous word already has the same prefix, that means this is the case and return ""
+  
+  In adj method, while comparing, if first string ends and common is not found, then its this case, return ""
+  
+  
+  ** Your output string must contain all unique letters that were within the input list, including those that could be in any position within the ordering. It should not contain any additional letters that were not in the input. ** very imp
+
+'''
+
+class Solution:
+  
+    def top_sort_dfs(self, graph, indegree):
+      WHITE, GREY, BLACK = -1, 0, 1
+      status = {node: -1 for node in indegree}
+      top_sort = []
+      
+      def dfs(node):
+        status[node] = GREY
+        
+        for neighbour in graph[node]:
+          if status[neighbour] == GREY:
+            cycle_found = True
+            return True
+          elif status[neighbour] == WHITE:
+            cycle_found = dfs(neighbour)
+            if cycle_found: return True
+          
+        status[node] = BLACK
+        top_sort.append(node)
+        return False
+        
+      cycle_found = False
+      for node in indegree:
+        if status[node] == WHITE:
+          cycle_found = dfs(node)
+          if cycle_found:
+            break
+      
+      if cycle_found: return ''
+      top_sort.reverse()
+      return ''.join(top_sort)
+          
+    def top_sort_bfs(self, graph, indegree):
+
+      queue = collections.deque([letter for letter in indegree if indegree[letter] == 0])
+
+      top_sort = []
+      while(queue):
+        curr_letter = queue.popleft()
+        top_sort.append(curr_letter)
+        
+        for neighbour in graph[curr_letter]:
+          indegree[neighbour] -= 1
+          if indegree[neighbour] == 0:
+            queue.append(neighbour)
+        
+      return ''.join(top_sort) if len(top_sort) == len(indegree)  else ''
+      
+      
+    def alienOrder(self, words: List[str]) -> str:
+        if len(words) == 1: return words[0]
+        graph = collections.defaultdict(set)
+        
+        #to not forget adding all letters in graph
+        indegree = {char: 0 for word in words for char in word}
+
+        #graph = {t -> f, w-> e, r -> t, e-> r}
+        for i in range(1, len(words)):
+          
+          word1 = words[i-1]
+          word2 = words[i]
+          
+          p1, p2 = 0, 0
+          
+          while(p1 < len(word1) and p2 < len(word2)):
+            if word1[p1] != word2[p2]:
+              if word2[p2] not in graph[word1[p1]]:
+                graph[word1[p1]].add(word2[p2])
+                # indegree[word2[p2]] += 1
+              break
+              
+            p1 += 1
+            p2 += 1
+          
+          #zzx and then zz case
+          #we reached end of second word, and second word < len(first word)
+          if p2 == len(word2) and len(word2) < len(word1):
+            return ""
+      
+        return self.top_sort_dfs(graph, indegree)
+              
+      
+ Approach 2: TRIE
+ TC: O(total chars) + (v+e)
+ 
+ v = unique chars in words, e = maximum (vsq, no of words)  
+(e = no of words, becuase max edges we can get is from every adjacent pair of word, one edge per pair)
+we can say that unique chars < total chars and no of words <= total chars
+so TC: O(totalchars) + O(totalchars) + O(total chars)
+
+SC: In case of trie, we are storing all words in trie, so O(total chars) + (indegree)(O(unique chars)) + graph(O(edges) + O(unique chars))
+since u.= 26, O(total chars) + O(26) + min(O(26sq, N)) ie 26^2 so, space complecxity without true is constant, and with trie is O(c)
+
+      
+class TrieNode:
+  def __init__(self):
+    self.children_chars = []
+    self.child_tries = []
+    
+class TrieGraph:
+  def __init__(self, words):
+    
+    self.root_node = TrieNode()
+    self.graph = collections.defaultdict(list)
+    self.indegree = collections.defaultdict(int)
+    self.chars = set()
+    
+    self.sort_exists = True
+    for word in words:
+      curr_node = self.root_node
+      for char in word:
+        #case like z, x, z, z is coming again, it cannot
+        if char in curr_node.children_chars and curr_node.children_chars[-1] != char:
+          self.sort_exists = False
+          break
+        elif char in curr_node.children_chars:
+          trie_idx = curr_node.children_chars.index(char)
+          curr_node = curr_node.child_tries[trie_idx]
+        else:
+          new_child = TrieNode()
+          if curr_node.children_chars:
+                self.graph[curr_node.children_chars[-1]].append(char)
+                self.indegree[char] += 1
+          curr_node.children_chars.append(char)
+          curr_node.child_tries.append(new_child)
+          curr_node = new_child
+          self.chars.add(char)
+      
+      #for cases like abb, ab
+      if self.sort_exists and curr_node.children_chars:
+        self.sort_exists = False
+      if not self.sort_exists:
+        break
+    
+  def top_sort(self):
+    queue = collections.deque([])
+    for char in self.chars:
+      if self.indegree[char] == 0:
+        queue.append(char)
+    top_sort = []
+    while(queue):
+      curr = queue.pop()
+      top_sort.append(curr)
+      
+      for neighbour in self.graph[curr]:
+        self.indegree[neighbour] -= 1
+        if self.indegree[neighbour] == 0:
+          queue.append(neighbour)
+    return ''.join(top_sort)
+
+class Solution:
+  def alienOrder(self, words: List[str]) -> str:
+
+    trie = TrieGraph(words)
+    if not trie.sort_exists:
+      return ""
+    
+    return trie.top_sort()
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+        
