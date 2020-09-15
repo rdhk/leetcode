@@ -1,0 +1,33 @@
+House Robber 1:
+
+For every house starting at i, fing max money we can rob if we started at that house, by either robbing current house + max(currhouse + 2) or skipping curr house and 
+starting robbing from next house(max(curr_house + 1))
+
+Recurrence Relation:
+Max_money[i] = max(money[i] + max_money[i+2], max_money[i+1])
+TC: O(n), SC: O(n) if 1d cache, otherwise, O(1) - if two temp variables
+
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        
+        if not nums:
+          return 0
+        
+        #[2,7,9,3,1]
+        #[12,10,10,3,1,0]
+#         max_money_starting_at_house_i = [0]*(len(nums) + 1)
+#         max_money_starting_at_house_i[len(nums) - 1] = nums[-1]
+        
+        
+#         for house_start in range(len(nums) - 2, -1, -1):
+#           money_in_curr_house = nums[house_start]
+#           max_money_starting_at_house_i[house_start] = max(money_in_curr_house + max_money_starting_at_house_i[house_start + 2], max_money_starting_at_house_i[house_start+1])
+
+        money_next_house, money_alternate_house = nums[-1], 0
+        #[2,7,9,3,1]
+        #next, alternate = 10, 10
+        for house_start in range(len(nums) - 2, -1, -1):
+          money_in_curr_house = nums[house_start]
+          money_next_house, money_alternate_house =  max(money_in_curr_house + money_alternate_house, money_next_house), money_next_house
+          
+        return money_next_house
