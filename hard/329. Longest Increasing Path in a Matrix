@@ -1,0 +1,99 @@
+'''
+Here the brute force solution might have been to start a dfs from each cell, and try to see the max path length of the dfs from each of the nodes
+
+This would have been v*(v+e) ie n* (n + 4n) [since from each vertex max 4 edges are possible] ie n*(5n) ~ nsq
+
+If we observe, for each node, while trying to do a dfs, edge is only formed if node2 > node1, so no matter what happens, we can not have a cycle because once node2 > node1, node 3 > node2, and in no way node 1 will ever be greater than node 3. So, we dont even need to keep a visited set because in a single dfs, there wont ever be a back edge.
+
+Now for each node, max path from that node is nothing but 1 + [max_path(neighbour) for neigbhbour in neighbours]
+
+now for each neighbour, its a valid neighbour only if its in bounds of matrix, and its value > curr value. If that is the case, we can count the max length obtained from this neighbour,
+In the process of dfs, we also calc the max length possible from each node in dfs of the neighbour, and in the end of dfs, marking its max length possible in a map, which acts like a visited map + cache like in dp, if its already been visited once, we just need to return the max length from that neighbour, else do a full dfs
+
+
+So, the TC of this solution is n+ e ie (n + 4n) ie O(n) n is cols*rows
+Its becaue one cell visited once, will not be visited again.
+The max path is 1 + max of all the max paths we can reach from the neighbours(and there will never be a back edge)
+
+
+SC: O(m*n) to store max length path from each node, and recursion stack O(m*n) wprst case when all are connected
+
+'''
+
+class Solution:
+    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+      if not matrix: return 0
+      visited_max_path_len = {}
+      rows = len(matrix) #3
+      cols = len(matrix[0]) #3
+      
+      #visited_max_path_len = {(0,0): 1, (0,1): 1, (0,2): 2, (1,2): 1, (1,1): 2, (1,2): 2, (2,0): 3, (2,1): 4, (2,2): 2}
+      #max_len_possible = 3
+      #0,0
+      def is_valid_increasing_neighbour(new_x, new_y, curr_value):
+        return 0 <= new_x < rows and 0 <= new_y < cols and matrix[new_x][new_y] > curr_value
+      
+      def dfs(x, y):
+        nonlocal max_len_possible
+        #like dp cache
+        if (x,y) not in visited_max_path_len:
+          max_len_via_neighbour = 0
+          curr_value = matrix[x][y]
+          
+          for x_diff, y_diff in ((0,-1), (0, 1), (-1, 0), (1, 0)):
+            new_x, new_y = x + x_diff, y + y_diff
+            #only then its an eligible neighbour
+            if is_valid_increasing_neighbour(new_x, new_y, curr_value):
+            
+              max_len_via_neighbour = max(max_len_via_neighbour, dfs(new_x, new_y))
+          
+          visited_max_path_len[(x,y)] = 1 + max_len_via_neighbour
+          
+        return visited_max_path_len[(x,y)]
+
+            
+      max_len_possible = max(dfs(x, y) for x in range(rows) for y in range(cols))
+            
+      return max_len_possible
+
+
+    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+      if not matrix: return 0
+      graph = collections.defaultdict(list)
+      indegree = collections.defaultdict(int)
+      
+      rows, cols = len(matrix), len(matrix[0])
+      
+      def is_valid_increasing_neighbour(new_x, new_y, curr_value):
+        return 0 <= new_x < rows and 0 <= new_y < cols and matrix[new_x][new_y] > curr_value
+      
+      def find_neighbours(x, y):
+          nonlocal graph, indegree
+          curr_value = matrix[x][y]
+          for x_diff, y_diff in ((0,-1), (0, 1), (-1, 0), (1, 0)):
+            new_x, new_y = x + x_diff, y + y_diff
+            #only then its an eligible neighbour
+            if is_valid_increasing_neighbour(new_x, new_y, curr_value):
+              graph[(x,y)].append((new_x, new_y))
+              indegree[(new_x, new_y)] += 1
+          
+      [find_neighbours(row, col) for row in range(len(matrix)) for col in range(len(matrix[0]))]
+      
+      queue = collections.deque([(x,y) for x in range(len(matrix)) for y in range(len(matrix[0])) if  indegree[(x,y)] == 0])
+      
+      max_path_len = 0
+      while(queue):
+        
+        max_path_len += 1
+        length = len(queue)
+        for i in range(length):
+          curr = queue.popleft()
+          
+          for neigh in graph[curr]:
+            indegree[neigh] -= 1
+            if indegree[neigh] == 0:
+              queue.append(neigh)
+      return max_path_len
+              
+      
+            
