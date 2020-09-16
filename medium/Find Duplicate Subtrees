@@ -1,0 +1,83 @@
+#the serialization of a tree uniquely identifies that tree
+#my brute froce approach was to create a full serialization of the tree, and store serialization of each subtree on the go(in node data)
+#Then for each subtree, check if serialization of that subtree occurs more than once in full string, then that node is duplicate O(n+n) for each node, 
+so tc will be O(nsq) and storing serialization of each subtree also take O(n) for each node(joining 3 strings in a copy take O(n) time), so TC: will have been
+O(nsq + nsq) and SC also O(nsq)
+
+
+A bit better soln:
+calculate serialization of each subtree on the go like before, but check in a hash of all serializations if we have seen that serialization before.
+Although hash check will take O(1) time, but still we'll need to join 3 strings for each node to calc serial, so n*n will be O(n2)
+O(nsq) to store each serialfore
+
+BEST APPROACH: 
+For each unique subtree, (curr.val, left id, right id) uniquely identifies a tree. Store this in a hash, if we have seen this before once, add curr node in ans 
+and increment its count, if we havent, create a new id for currnt subtree , ans store it in hash as (val, leftid, rightid) and return new id for this subtree.
+
+
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def findDuplicateSubtrees(self, root: TreeNode) -> List[TreeNode]:
+        
+        
+        def serialize(root):
+          if not root:
+            return '#'
+          
+          left_serial_str = serialize(root.left)
+          right_serial_str = serialize(root.right)
+          
+          #this is O(n) step, imagine creating a copy of 3 arrays of total length n -> it would take O(n) time
+          serial_str = "{},{},{}".format(root.val, left_serial_str, right_serial_str)
+          if hash_serials[serial_str] == 1:
+            ans.append(root)
+            
+          hash_serials[serial_str] += 1
+          return serial_str
+          
+        
+        ans = []
+        hash_serials = collections.defaultdict(int)
+        serialize(root)
+        return ans
+        
+        
+#BEST APPROACH:
+Since we are only making a serial hsh of length 3 at every node, time for each is now O(1) and total space is O(n) , so
+TC: O(n) and SC: O(n)
+class Solution:
+    def findDuplicateSubtrees(self, root: TreeNode) -> List[TreeNode]:
+        
+        auto_incr_id = 0
+        tree_id = {}
+        counts = collections.defaultdict(int)
+        ans = []
+        #hash_id_and_counts = {(4,#,#): (0,2), (2, 0, #): (1, 2), (3,1,0): (2, 1), (1,1,2): (3, 1)}
+        #ans = [4, 2]
+        def postorder_return_id(root):
+          nonlocal tree_id, auto_incr_id, ans, counts
+          if not root:
+            return '#'
+          
+          left_id = postorder_return_id(root.left)
+          right_id = postorder_return_id(root.right)
+          hash_key = (root.val, left_id, right_id)
+          
+          counts[hash_key] += 1
+          
+          if counts[hash_key] == 1:
+            tree_id[hash_key] = auto_incr_id
+            auto_incr_id += 1
+            
+          elif counts[hash_key] == 2:
+            ans.append(root)
+            
+          return tree_id[hash_key]
+        
+        postorder_return_id(root)
+        return ans
