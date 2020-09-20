@@ -1,0 +1,56 @@
+APPROACH: BACKTRACKING
+with added condition that exactly all 0's must be visited once
+
+class Solution:
+  
+    #TC: O(3^n because T(n) = 3T(n-1) + O(1))
+    #[3^(n-1)]*4 for all cells except first, options are 3 as one is the one we are coming from
+    
+    #SC: O(n) for max depth of recursion will be n
+    def uniquePathsIII(self, grid: List[List[int]]) -> int:
+        non_obstacles_rem = 0
+        rows = len(grid)
+        cols = len(grid[0])
+        start = None
+        
+        for row in range(rows):
+          for col in range(cols):
+            cell = grid[row][col]
+            if cell >= 0:
+              non_obstacles_rem += 1
+            if cell == 1:
+              start = (row, col)
+        
+        
+        def dfs(x, y):
+          nonlocal non_obstacles_rem, grid, result
+
+          if grid[x][y] == 2:
+            #since 2 was not yet visited
+            result += 1 if non_obstacles_rem == 1 else 0
+            return
+          
+          #mark current visited
+          
+          non_obstacles_rem -= 1
+          prev_val = grid[x][y]
+          grid[x][y] = 'V'
+          
+          neighbours = ((x+1, y), (x-1, y), (x, y-1), (x, y+1))
+          for x_next, y_next in neighbours:
+            
+            if (0 <= x_next < rows) and (0 <= y_next < cols) and grid[x_next][y_next] in (0,2):
+              dfs(x_next, y_next)
+              
+          non_obstacles_rem += 1
+          grid[x][y] = prev_val
+        
+        result = 0
+        start_x, start_y = start
+        # [[1,0,0,0],[0,0,0,0],[0,0,2,-1]]
+        dfs(start_x, start_y)
+        
+        return result
+        
+              
+      
