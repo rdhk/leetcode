@@ -1,0 +1,60 @@
+Brute Force: 
+[1,2]   2
+Starting at 1, it will go on till end of 2
+We can traverse the series one by one and say that from 1, it will last till 3,
+so next is 3 until its effective, then we come to 2 and say that 2-3 is overlapping, so go to 3 and add end time of second - end time until now if its positive , so 2 + 1 = 3
+O(n)
+
+
+[1,4], 2
+start at 1, go till 3, ans = 2
+end_prev = 3
+
+if next start time < end time, then overlap,
+
+otherwise not, 
+
+4 -> start time > end time so no overlap , add 2 and end time equals 6
+
+
+ 
+[1,2]   2
+1 -> 4
+2-> 5
+ans += (new_finish - old_finish) if overlapping
+
+Since no of elements in ascending series is quite small, O(n) is better than doing a binary search by skipping elements
+
+#[1,2]   2
+#[1,4], 2
+
+class Solution:
+    def findPoisonedDuration(self, timeSeries: List[int], duration: int) -> int:
+	#Two pointers
+	#First at start of interval or starting poison position
+	#until u encounter a non overlapping poison start point, keep increasing finish time and curr start point
+#when finally a non overlapping start point is found, add it to the finish time.
+if not timeSeries or duration == 0:
+	return 0
+
+#[1,2], 2
+
+finish_time = None #3
+result = 0 #0
+start_ptr = -1 #0
+
+for curr_ptr in range(len(timeSeries)):
+	#overlap
+	if start_ptr < 0:
+		start_ptr = curr_ptr
+	#no overlap
+elif timeSeries[curr_ptr] >  finish_time:
+	result += (finish_time - timeSeries[start_ptr])
+	start_ptr = curr_ptr
+	
+finish_time = timeSeries[curr_ptr] + duration
+
+result += (finish_time - timeSeries[start_ptr])
+return result
+#TC: O(n)
+#SC: O(1)
