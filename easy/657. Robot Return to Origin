@@ -1,0 +1,27 @@
+#up left left  right down right
+
+#the net movement in both horizontal and vertical dirs should be zero, if both become zero, robot returns to origin.
+Note that here the dirn its facing does not matter
+TC: O(moves)
+Sc: O(1)
+
+class Solution:
+    def judgeCircle(self, moves: str) -> bool:
+      net_horizontal = 0
+      net_vertical = 0
+      letter_dirn_mag_mapping = {
+        "L": {"dirn": 0, "magnitude": -1}, 
+        "R": {"dirn": 0, "magnitude": 1},
+        "U": {"dirn": 1, "magnitude": 1}, 
+        "D": {"dirn": 1, "magnitude": -1}
+      }
+
+      for move in moves:
+        magnitude, dir = letter_dirn_mag_mapping[move]["magnitude"], letter_dirn_mag_mapping[move]["dirn"]
+        if dir == 0:
+          net_horizontal += magnitude
+        elif dir == 1:
+          net_vertical += magnitude
+
+      return net_horizontal == 0 and net_vertical == 0
+
