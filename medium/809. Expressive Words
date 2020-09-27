@@ -1,0 +1,71 @@
+#we need to compare every query with the stretchy word one by one
+Now, we can store the order of char and their count in a list for the stretchy word so we dont have to loop through S again and again.
+
+we can maybe make a trie, and traverse all the possible letters from words in trie, and whenever a mismatch is found, we can abort all the words starting with that prefix, but since the no of words is less, we can try comparing the strs one by one.
+"heeellooo"
+
+[("h", 1), ("e", 3), ("l", 2), ("o", 3) ]
+"hello"
+for char in query, if char != currPtr in stretchy - false
+if equal, and the count is equal, continue to next letter
+if equal char and count is unequal, stretchy count is should be atleast 3, else we will need to return false 
+TC: (sum of length of all chars in queries)*len(stretchy word)
+SC: constant(we only need to keep stretchy char's )
+
+
+
+class CharFreq:
+  def __init__(self, char, count):
+    self.char = char
+    self.count = count
+
+class Solution:
+    def get_char_freq_with_order(self, word):
+      list_count = []
+      #"heeellooo"
+      #[["h", 1], ["e", 3], ["l", 2], ["o", 3]]
+      for idx, char in enumerate(word):
+        #empty list or first occurrence of this group of chars
+        if not list_count or list_count[-1].char != char:
+          list_count.append(CharFreq(char, 1))
+        #increase curr chars count by 1
+        else:
+          list_count[-1].count += 1
+      return list_count
+		
+    def can_stretch(self, word, stretchy_word_char_count):
+	
+      '''for char in query, if char != currPtr in stretchy - false
+      if equal, and the count is equal, continue to next letter
+      if equal char and count is unequal, stretchy count is should be atleast 3, else we will need to return false 
+      also handle case of either of the words being of unequal group length
+      '''
+      if not word:
+        return False
+
+      
+      word_freq = self.get_char_freq_with_order(word)
+      if len(word_freq) != len(stretchy_word_char_count):
+        return False
+
+      for idx, wordchar_freq in enumerate(word_freq):
+        stretchy_char, stretchy_freq = stretchy_word_char_count[idx].char, stretchy_word_char_count[idx].count
+        if wordchar_freq.char !=  stretchy_char:
+          return False
+        elif wordchar_freq.count > stretchy_freq:
+          return False
+        elif wordchar_freq.count < stretchy_freq and  stretchy_freq < 3:
+          return False
+      
+      return True
+    
+
+    def expressiveWords(self, S: str, words: List[str]) -> int:
+        if not S or not words: return 0
+        count_stretchy_word = self.get_char_freq_with_order(S)
+
+        result = 0
+        for query in words:
+          result += int(self.can_stretch(query, count_stretchy_word))
+        return result
+
