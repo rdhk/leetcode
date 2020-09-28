@@ -141,5 +141,148 @@ class Solution:
           answers.append(uf.get_quotient(dividend, divisor))
           
       return answers
+      
+      
+      
+      
+ATtempt 2:
+Ans. One thing we can deduce from here is that we can only calculate results for 2 nodes only if they are connected. If they are not, then we can not deduce the ans to node1/node2.
+
+suppose we are given  "a"/"b" = 2, b/c = 3, d/c=4, then we can deduce that b/a = 0.5 and c/b = ⅓, c/d= 1/4
+now a/d can be found by (a/b)*(b/c)*(c/d) ie 2*3*(¼) = 1.5
+
+This can be thought of as a directed graph, and if a path exists between two nodes, then there is an answer. ANd the edge weight between two nodes is the actual ans of node1/ node2.
+
+So, in brute force, we can represent the graph as a adjacency list like
+
+a -> (b, 2)
+b-> (a,0.5), (c, 3)
+c -> (b, 1/3), (d, ¼)
+d -> (c,4)
+so a/d will be a->b->c->d ie 2*3*¼
+
+so the TC for this will be equations * O(V+E)
+Since equations are 20, max vertices can be 40, max edges can be (no of equations*2).
+
+so v+e will be max (2E + 2E) ~ 4E ~O(E)
+
+each query will be costing us O(E) time.
+
+Approach 2:
+If we observe more closely, then we find one of the problems is that is there a way to reach from a to b, which also means that do a and b belong to the same connected component.
+
+The next thing is if they do, what is the ans of a/b.
+
+We can use union find to find out if they belong to same component in effectively O(1) time using union find.
+In union find, we store the value of parent for each of the nodes.
+In addition to storing the parent or each nodes, we can also store its relationship with the parent by storing value of node/parent in every node's values array.
+
+Eg union(a,b) where a/b = 2
+Now parent(a) = b
+value(a) = a relative to b ie a = 2b
+so store ratio of a is to b.
+value(b) = 1
+
+Then union c to d which is ¼.
+parent(c) = d
+value(c) = c/d = ¼, value of d = 1
+
+Now if we union b and c (3),
+b's parent is now d and b/d will be 
+value(b/c)*(value(c/d))
+b/c = 3,
+r1 = b/parent1 = 1
+r2 = c/parent2 = ¼
+now parent1/parent2 = (b/r1) / (c/r2) = quotient*(r2/r1)
+so b's value is b/d which is 3*¼ = ¾
+
+b/d = ¾
+parent of a is still b and val is 2
+now when we find a, its parent should be d now, when we change its parent value, we also change its ratio value which is nothing but a/b*b/d ie a/d ie (2*3)/4 = 3/2 = 1.5
+so a = 1.5d
+
+now whenever we want to find a/b we already have a/d and b/d
+so ans is simply find(a)/find(b)
+
+TC: to create union find - O(equations) ie no of union operations
+for each query, it will be a O(1) operation as compared to a O(n) operation in dfs.
+
+a   b   c   d   e   f
+b   b        e   e  e
+
+e/f = 2
+a/f = 3
+
+
+a 's parent will now be e
+
+class UnionFind:
+    def __init__(self, equations):
+        self.var_idx_mapping = {}
+        idx = 0
+        #{"a": 0, "b": 1, "c": 2}
+        #parents = [2,2,2], ratio_to_parents = [6,3,1]
+        for var1, var2 in equations:
+            if var1 not in self.var_idx_mapping:
+                self.var_idx_mapping[var1] = idx
+                idx += 1
+            if var2 not in self.var_idx_mapping:
+                self.var_idx_mapping[var2] = idx
+                idx += 1
+        
+        total_nodes = len(self.var_idx_mapping)
+        self.parents = [idx for idx in range(total_nodes)]
+        self.ratio_to_parent = [1 for idx in range(total_nodes)]
+  
+
+    def find(self, idx):
+        #parent, ratio_with_parent = self.parents[idx], self.ratio_to_parent[idx]
+        #do path compression
+        if self.parents[idx] != idx:
+            self.parents[idx], ratio_parent_with_group_parent = self.find(self.parents[idx])
+            self.ratio_to_parent[idx] = self.ratio_to_parent[idx] * ratio_parent_with_group_parent
+
+        return self.parents[idx], self.ratio_to_parent[idx] 
+
+        
+    def union(self, var1, var2, quotient):
+        idx1, idx2 =  self.var_idx_mapping[var1], self.var_idx_mapping[var2]
+        parent1, ratio_parent1 = self.find(idx1)
+        parent2, ratio_parent2 = self.find(idx2)
+
+        if parent1 != parent2:
+          self.parents[parent1] = parent2
+          self.ratio_to_parent[parent1] = quotient * (ratio_parent2/ratio_parent1)
+
+    def evaluate_division(self, dividend, divisor):
+        if divisor not in self.var_idx_mapping or dividend not in self.var_idx_mapping:
+          return -1
+
+        idx1, idx2 =  self.var_idx_mapping[dividend], self.var_idx_mapping[divisor]
+        #2,6.  
+        parent1, ratio_parent1 = self.find(idx1)
+        parent2, ratio_parent2 = self.find(idx2)
+        if parent1 != parent2:
+          return -1
+        else:
+          return ratio_parent1/ratio_parent2
+        
+
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+    
+      #[["a","b"],["b","c"]]
+      #[2.0,3.0], 
+      #queries = [["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]]
+      uf = UnionFind(equations)
+      for idx, (var1, var2) in enumerate(equations):
+        value = values[idx]
+        uf.union(var1, var2, value)
+        
+      results = []
+      for q_dividend, q_divisor in queries:
+        results.append(uf.evaluate_division(q_dividend, q_divisor))
+      return results
+
            
         
