@@ -1,0 +1,47 @@
+Your algorithm should run in O(n) time and uses constant extra space.
+
+#brute force -> find 1, find 2, find3, O(nsq)
+[3,4,-1,1] - 2
+#sort it and then find in O(n) time - total nlogn
+#hash table solution - O(n) time and O(n) space, add to ht if > 0 and then from 0 to n-1, see if each digit is present in hash or not
+
+We can observe that max possible missing integer will be in range 1 to n+1, how can we somehow use the indexes to mark if its visited or not
+
+[-3,4,-1,-7,4,-6,1]
+For each int, if its in range(1 to n), we can mark it visited by making its index negative.
+But problem is that we will not be able to differentiate between already negative integers and previously positive integers. So when we actually visit the previously positive integer, 
+we wont be able to mark its index visited by negating it. 
+So, if we notice here we dont really care about the negative ints here. So, one thing we can do is that we can mark all the negative ints as lets say n+2, so that all nos become postive now.
+[3,4,-1,1] -> [3,4,6,1]
+Now, we can use just the sign for marking visited and the magnitude for the number we need to mark visited.
+We also need to convert 0 to n+2, otherwise if some no tries to convert the index at which 0 is present to negative, it wont change, hence visited will not be reflected.
+Then we just need to do a scan from start idx to end index and return the index which has a val > 0 or if none is found, then the val is n+2
+
+class Solution:
+  def firstMissingPositive(self, nums: List[int]) -> int:
+    if not nums:
+      return 1
+    #[-8,4,8,-8,4,8,1]
+    #[-1,-2,5]
+    #[-3,4,-6,-1]
+    #[7,8,9,11,12]
+    max_missing_num = len(nums)  + 1 #8
+
+    for idx, num in enumerate(nums):
+      if num <= 0:
+        nums[idx] = max_missing_num + 1
+
+    for idx, num in enumerate(nums):
+      #possible to mark an idx visited
+      magnitude = abs(num)
+      if 1 <= magnitude <= len(nums) and nums[magnitude - 1] > 0:
+        #mark visited
+        nums[magnitude - 1] *= -1
+
+    for idx, num in enumerate(nums):
+      if num > 0:
+        return idx + 1
+
+    return max_missing_num
+
+      
