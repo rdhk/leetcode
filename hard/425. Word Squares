@@ -1,0 +1,141 @@
+Ans. One thing to note here, since its a sq, the rows and cols must be same no equal to length of each word(which is same).
+So, in each combination, we can pick no of words = the length of each word
+
+For each combination of wordLength words,under what condition are they a word square.
+
+We can try placing all the words at k=0 one by one and see which of them lead to a solution.
+["area","lead","wall","lady","ball"]
+Eg. place area
+	    r
+	    e
+                a
+Now, for area to be first word, our next word should begin with r or it should have a prefix r. None of the words have that.
+So backtrack and place lead at k=0 now.
+lead
+e
+a
+d
+Again, we dont have any word starting with e.
+So, backtrack and place wall
+wall
+a
+l
+l
+Now we have area starting with a a.So, place area
+wall
+area
+le
+la
+
+Now our next word should start with a e.
+So, its only lead.
+wall
+area
+lead
+lady
+Now only lady begins with lad, so place lady and our word sq is formed.
+
+If we backtrack to placing lady at first, we wont have a word with de. So backtrack and place ball
+lady
+area
+de
+ya
+
+
+ball
+area
+lead
+lady
+So we'll be able to form these two word squares.
+Since we are required to find words with a given prefix, trie is the first ds that comes to our mind.
+For each prefix, we can keep a list of word indexes which give us all the words starting with the given prefix. (since the no of words is under a thousand.)
+
+Now, another thing that i implemented that could be improved is, i took a 2d matrix and i placed rows as well ar kth cols while placing a word.
+But if u observe closely, kth prefix can be obtained by actually find all the kth column letters placed until now.
+
+Eg 
+ball
+area
+
+to find prefix of third row, we can take chars from 3rd col ie,   l and e.
+So we can have a one-d grid and directly place words at kth row and later to get prefix get kth letter of each placed word until now.
+Code.
+
+'''
+TC: create trie(words*length of words) + 
+    words * tc of backtrack = words*(O(wordLength) for finding prefix and curr_trie_node as max word length is 5 + no of choices = max no of words beginning with curr prefix and depth is length of word)
+    N= no of words, L = length of each word
+    T(L) = N*T(L-1) + O(L)
+    => T(L) = (n^L)*L
+    so total TC = N*l*(N^L)
+    
+    = words* [(words^length of word)*wordLength]
+SC: words*length of words for trie + length of single word for recursion depth + 
+
+'''
+
+class TrieNode:
+  def __init__(self):
+    self.children = collections.defaultdict(TrieNode)
+    self.words = []
+
+    # #"wall"
+    #   area
+    #   le
+    #   la
+class Trie:
+  def __init__(self, words):
+    self.root = TrieNode()
+    
+    for idx, word in enumerate(words):
+      self.add_word(word, idx)
+      
+  def add_word(self, word, idx):
+    
+    curr_node = self.root
+    
+    for char in word:
+      curr_node = curr_node.children[char]
+      curr_node.words.append(idx)
+
+class Solution:
+    def wordSquares(self, words: List[str]) -> List[List[str]]:
+      
+      word_sq_dimensions = len(words[0])
+      
+      trie_root = Trie(words).root
+      
+      results = []
+      
+      word_sq = ['*' for i in range(word_sq_dimensions)]
+      
+      def place(word, idx=0):
+        
+        nonlocal word_sq
+        word_sq[idx] = word
+      
+      def backtrack(trie_root, curr_word_idx, word_sq_side):
+        #goal
+        #since all nodes are of same length, if we have reached here it means we have found a result
+        nonlocal results, word_sq
+        if curr_word_idx == word_sq_side:
+          results.append(word_sq[::])
+          return
+        
+        curr_trie_node = trie_root
+        for i in range(curr_word_idx):
+          char = word_sq[i][curr_word_idx]
+          if char not in curr_trie_node.children:
+            return
+          curr_trie_node = curr_trie_node.children[char]
+          
+        for possible_word_idx in curr_trie_node.words:
+          possible_word = words[possible_word_idx]
+          place(possible_word, idx=curr_word_idx)
+          backtrack(trie_root, curr_word_idx + 1, word_sq_side)
+      
+      for word in words:
+        place(word, idx=0)
+        backtrack(trie_root, 1, word_sq_dimensions)
+      
+      return results
