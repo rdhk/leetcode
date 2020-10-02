@@ -1,0 +1,94 @@
+#we can check if start and end are same letters, if they are, 
+# we can say that longest palin subseq will have 2 + longest_palin(s+1, e-1), 
+# if they are not the same, then longest can be by either excluding left letter or the right and checking the rem string again and picking the max of both cases.
+
+
+# our state is defined by start, end and base case is s == end, which is the case for all 1 letter strings.
+Nsq space
+
+class Solution:
+    def longestPalindromeSubseq(self, s: str) -> int:
+      length = len(s)
+      dp = [[0]*length for i in range(length)]
+      #   b b b a b
+      # b 1 2 3 3 4        
+      # b   1 2 2 3
+      # b     1 1 3
+      # a       1 1
+      # b         1
+      for start in range(length-1, -1, -1):
+        for end in range(start, length):
+          if start == end:
+            dp[start][end] = 1
+            
+          elif s[start] == s[end]:
+            dp[start][end] = 2 + dp[start + 1][end - 1]
+            
+          else:
+            dp[start][end] = max(dp[start + 1][end], dp[start][end - 1])
+            
+      return dp[0][length - 1]
+      
+O(2n) space 
+class Solution:
+    def longestPalindromeSubseq(self, s: str) -> int:
+      length = len(s)
+      prev = [0]*length
+      curr = [0]*length
+      prev[-1] = 1
+      #   b b b a b
+      # b 1 2 3 3 4        
+      # b   1 2 2 3
+      # b     1 1 3
+      # a       1 1
+      # b         1
+      for start in range(length-2, -1, -1):
+        for end in range(start, length):
+          if start == end:
+            curr[end] = 1
+            
+          elif s[start] == s[end]:
+            curr[end] = 2 + prev[end - 1]
+            
+          else:
+            curr[end] = max(prev[end], curr[end - 1])
+            
+        prev, curr = curr, prev
+            
+      return prev[length - 1]
+
+O(n) space
+#we can check if start and end are same letters, if they are, 
+# we can say that longest palin subseq will have 2 + longest_palin(s+1, e-1), 
+# if they are not the same, then longest can be by either excluding left letter or the right and checking the rem string again and picking the max of both cases.
+
+
+# our state is defined by start, end and base case is s == end, which is the case for all 1 letter strings.
+
+class Solution:
+    def longestPalindromeSubseq(self, s: str) -> int:
+      length = len(s)
+      # prev = [0]*length
+      curr = [0]*length
+      #   b b b a b
+      # b 1 2 3 3 4        
+      # b   1 2 2 3
+      # b     1 1 3
+      # a       1 1
+      # b         1
+      for start in range(length-1, -1, -1):
+        for end in range(start, length):
+          temp = curr[end]
+          if start == end:
+            curr[end] = 1
+            
+          elif s[start] == s[end]:
+            curr[end] = 2 + max_if_both_included
+            
+          else:
+            curr[end] = max(curr[end], curr[end - 1])
+            
+          max_if_both_included = temp
+            
+      return curr[length - 1]
+      
