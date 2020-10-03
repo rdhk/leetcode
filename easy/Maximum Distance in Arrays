@@ -1,0 +1,118 @@
+# [[1,2,3],
+#  [4,5],
+#  [1,2,3]]
+
+# #[1,1,4]
+# [-5,-3,-3]
+# #min = 1, max = 3
+# #max_diff = 4
+#Here we are comparing all the minimums of each array to maximum of all the arrays if they are in a different array or second maximum if maximum in same array.
+#given a max and second max, we can maximise the max_diff if minimum is the most minimum. so, find the minimum of all arrays, and maximum of all arrays.
+#But they might be in the same array, so keep a second min and second max,
+#so for min and max, find diff with max and min if in diff array , or min and second max and second_min and max
+
+Brute Force with nlogn tc and n sc.
+class Solution:
+  
+# [[1,2,3],
+#  [4,5],
+#  [1,2,3]]
+
+# #[1,1,4]
+# [-5,-3,-3]
+# #min = 1, max = 3
+# #max_diff = 4
+    def maxDistance(self, arrays: List[List[int]]) -> int:
+        max_heap = []
+        min_heap = []
+        
+        for array in arrays:
+          if array:
+            min_heap.append(array[0])
+            max_heap.append(array[-1])
+            
+        min_heap.sort()
+        max_heap.sort(reverse=True)
+        
+        max_diff = -float(inf)
+        
+        for array in arrays:
+          if array:
+            minimum = array[0]
+            maximum = array[-1]
+            
+            #ensure not in same array
+            if max_heap[0] != maximum:
+              max_diff = max(abs(max_heap[0] - minimum), max_diff) 
+            else:
+              max_diff = max(abs(max_heap[1] - minimum), max_diff)
+            
+            if min_heap[0] != minimum:
+              max_diff = max(max_diff, abs(maximum - min_heap[0]))
+            else:
+              max_diff = max(max_diff, abs(maximum - min_heap[1]))
+        return max_diff 
+
+class Solution:
+
+  def maxDistance(self, arrays: List[List[int]]) -> int:
+      first_min, second_min, first_max, second_max = float(inf), float(inf), -float(inf), -float(inf)
+
+      minimum_idx = maximum_idx = None
+      for idx, array in enumerate(arrays):
+        if array:
+          minimum = array[0]
+          maximum = array[-1]
+
+          if minimum <= first_min:
+            minimum_idx = idx
+            second_min = first_min
+            first_min = minimum
+          elif minimum < second_min:
+            second_min = minimum
+
+
+          if maximum >= first_max:
+            maximum_idx = idx
+            second_max = first_max
+            first_max = maximum
+          elif maximum > second_max:
+            second_max = maximum
+
+      if minimum_idx != maximum_idx:
+        return abs(first_max - first_min)
+
+      else:
+        return max(abs(first_max - second_min), abs(first_min - second_max))   
+        
+              
+            
+
+class Solution:
+  
+    def maxDistance(self, arrays: List[List[int]]) -> int:
+      global_min, global_max = None, None
+      
+      max_diff = float(-inf)
+      
+      for array in arrays:
+        if array:
+            
+          if global_min is not None:
+            max_diff = max(max_diff, abs(array[0] - global_max), abs(array[-1] - global_min))
+            
+            global_max = max(global_max, array[-1])
+            global_min = min(global_min, array[0])
+          else:
+            global_max, global_min = array[-1], array[0]
+            
+      return max_diff
+      
+      
+      
+            
+      
+      
+        
+              
+            
