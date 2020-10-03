@@ -1,0 +1,28 @@
+[1, 100, 3001, 3002]
+Either we can keep adding in a list and at every time, traverse backwards until we have reached even before t-3000
+But if we look closely, if we have moved to a time t, since t is strictly increasing, we will never need pings before t-3000 ever.
+So, we can keep a queue like a sliding window, in which we always add new values to the right, and always delete the values from the left which are lesser than t - 3000.
+If there's a case like [1, 100, 3001, 3002], 7000
+, then first we'll remove all the pings until 4000 ie all.
+Since our pings are strictly increasing, it would never be more than 3000
+
+So TC of insertion is O(3000) or O(1)
+SC: O(3000) or O(1)
+
+
+
+
+
+class RecentCounter:
+    #[[], [1], [100], [3001], [3002]]
+    #[100,3001,3002, 7000]
+    def __init__(self):
+      self.last_n_sec_pings = collections.deque([])
+      self.n = 3000
+  
+    def ping(self, t: int) -> int:
+      while(self.last_n_sec_pings and self.last_n_sec_pings[0] < (t - self.n)):
+        self.last_n_sec_pings.popleft()
+
+      self.last_n_sec_pings.append(t)
+      return len(self.last_n_sec_pings)
