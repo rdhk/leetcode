@@ -1,0 +1,62 @@
+a=1 b=10
+c= 3, d = 7
+
+
+#Brute force, for every interval, find in rem intervals if they totally include the current interval, if yes, dont count curr interval in result
+O(nsq) time and O(1) space
+
+#if we sort the intervals 
+[0,9],[1,4], [2,3],[2,4], [3,6]
+1 . . 4
+  2 . . . . . . . 8
+     3 . . 6
+
+for each interval i, find a idx such that start <= istart and find a idx such that its end >= iend 
+
+After doing so, return the number of remaining intervals.
+
+[[1,12],[1,4],[1,2],[2,14], [2,9],[3,11], [4,7], [15, 17]]
+
+We can sort the intervals on start time, and then if tie, on the descending end times.
+Then keeping 2 pointers, we keep i and j on 0 and 1.
+If i and j have same start time, j is going be always redundant and keep incrementing j with same i as i is the longest parent interval possible until now.
+Then, if u come across a j such that j's end time > i's end time, i can no longer be a parent to j, so i = j, and j will be counted.
+now all comparisons will happen wrt j which is new i.
+all j's satisfy a <= c, and if b is not > d, we count second interval and make it our new reference point.
+
+
+#[[1,12],[1,4],[1,2],[2,14], [2,9],[3,11], [4,7], [15, 17]]
+rem = 3
+left = 7
+right = 7
+TC: nlogn and sc: O(1)
+class Solution:
+    def removeCoveredIntervals(self, intervals: List[List[int]]) -> int:
+    
+      if not intervals:
+        return 0
+        
+      #min 1 interval since not empty list
+      remaining_intervals = 1
+      intervals.sort(key = lambda x: (x[0], -x[1]))
+       
+      left_start, left_end = intervals[0]
+      
+      for right in range(1, len(intervals)):
+        right_start, right_end = intervals[right]
+        
+        #same start but decreasing end times, so directly skip  #eg 1, 10 and 2,9 or 2, 10
+        if right_start == left_start or right_end <= left_end:
+          continue   
+        else:
+          #earlier interval cant include current one, so this is new parent
+          remaining_intervals += 1
+          left_start, left_end = intervals[right]
+          
+     return remaining_intervals
+        
+        
+        
+        
+      
+        
