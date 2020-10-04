@@ -1,0 +1,146 @@
+ 0000 -> 
+            0001
+	0009
+	0010
+	0090
+	0100
+	0900
+	1000
+	9000 
+		0002
+		0011
+		0091
+    
+    
+Do a bfs from start to end
+create a set of deadends to ensure O(1) lookup time
+before adding a node to q, check if its not in deadends(even the start point) and also not in already visited(as it would mean a shorter length path already exists)
+keep a counter of steps ie for start step = 1, and if a neighbour is found while processing start, we can return the curr steps ie 1
+find all 8 neighbours by subs each letter of 4 letters by +1 and -1 %4 one by one
+return steps if target is found, 
+or out of while loop return -1
+
+max 8 edges at each point -> max nodes are 10*10*10*10 = 10^4
+TC: O(v+E)
+V = 10^4 ie (10 numbers)^(digits in lock)
+E = Digits*V
+Time to get each edge = (Digits^2) because we are looping from 1 to 4 and generating a string of length 4 in each iteration.
+So TC = (O(V) + time to generate edge for each node ie V*(digits^2)
++ time to make deadends set = O(D)
+SC: 10^digits for queue and visited and O(d) for deadends set
+
+
+class Solution:
+
+def valid_to_add_in_queue(self, curr):
+  return curr not in self.visited and curr not in self.deadends
+  
+def check_validity_mark_visited(self, curr):
+  if self.valid_to_add_in_queue(curr):
+    if curr == self.target:
+      return True
+    self.visited.add(curr)
+    self.queue.append(curr)
+  return False
+
+def neighbours(self, curr):
+  neighbours = []
+  for i in range(4):
+    for diff in (-1, 1):
+      neighbour = curr[:i] + str((int(curr[i]) + diff + 10) % 10) +  curr[i+1:]
+      neighbours.append(neighbour)
+  return neighbours    
+  
+#deadends = ["8888"], target = "0009"
+#["0201","0101","0102","1212","2002"], target = "0202"
+#visited = {"0000","0009", "0001", "0090", "0010", "0900", "0100", "9000", "1000", "2000"}
+#queue = ["1000", "9000", "0100", "0900", "0010", "0090", "0001", "0009"]
+#["2000"]
+
+def openLock(self, deadends: List[str], target: str) -> int:
+  start = "0000"
+  self.visited = set()
+  self.deadends = set(deadends)
+  self.queue = collections.deque([])
+  steps = 0
+  self.target = target
+  
+  if target in self.deadends: return -1
+  
+  found = check_validity_mark_visited(start)
+  if found: return steps
+    
+  while(queue):
+    length = len(queue)
+    steps += 1
+    for i in len(queue):
+      curr_node = self.queue.popleft()
+      for neighbour in self.neighbours(curr_node):
+        found = self.check_validity_mark_visited(neighbour)
+        if found:
+          return steps
+  
+  return -1       
+          
+BIDIRECTIONAL BFS
+class Solution:
+
+  def valid_to_add_in_queue(self, curr, visited):
+    return curr not in visited and curr not in self.deadends
+
+  def handle_queue_pop(self, queue, visited, visited_other):
+
+    curr, steps_until_now = queue.popleft()
+    # print([neighbour for neighbour in self.neighbours(curr) if self.valid_to_add_in_queue(neighbour, visited)], steps_until_now + 1)
+    for neighbour in self.neighbours(curr):
+      if self.valid_to_add_in_queue(neighbour, visited):
+        if neighbour in visited_other:
+          return steps_until_now + 1 + visited_other[neighbour]
+        visited[neighbour] = steps_until_now + 1
+        queue.append((neighbour, steps_until_now + 1))
+    return -1
+
+  def neighbours(self, curr):
+    for i in range(4):
+      for diff in (-1, 1):
+        neighbour = curr[:i] + str((int(curr[i]) + diff + 10) % 10) +  curr[i+1:]
+        yield neighbour
+
+  #deadends = ["8888"], target = "0009"
+  #["0201","0101","0102","1212","2002"], target = "0202"
+  #visited = {"0000","0009", "0001", "0090", "0010", "0900", "0100", "9000", "1000", "2000"}
+  #queue = ["1000", "9000", "0100", "0900", "0010", "0090", "0001", "0009"]
+  #["2000"]
+
+  def openLock(self, deadends: List[str], target: str) -> int:
+    start = "0000"
+    
+    self.visited_left = {}
+    self.visited_right = {}
+    
+    self.deadends = set(deadends)
+    self.target = target
+    
+    if start in deadends or target in deadends: return -1
+    if start == target:
+      return 0
+    
+    self.queue_left = collections.deque([(start, 0)])
+    self.queue_right = collections.deque([(target, 0)])
+    self.visited_left[start] = 0
+    self.visited_right[target] = 0
+
+    while(self.queue_left and self.queue_right):
+      
+      steps = self.handle_queue_pop(self.queue_left, self.visited_left, self.visited_right)
+      if steps > -1:
+        return steps
+      
+      steps = self.handle_queue_pop(self.queue_right, self.visited_right, self.visited_left)
+      if steps > -1:
+        return steps
+  
+    return -1  
+    
+   
+    
