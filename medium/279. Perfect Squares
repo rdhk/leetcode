@@ -1,0 +1,72 @@
+Given a positive integer n, find the least number of perfect square numbers (for example, 1, 4, 9, 16, ...) which sum to n.
+
+Example 1:
+
+Input: n = 12
+Output: 3 
+Explanation: 12 = 4 + 4 + 4.
+Example 2:
+
+Input: n = 13
+Output: 2
+Explanation: 13 = 4 + 9.
+
+Brute force, only squares of nos upto root n can be included, as all others are > n
+find root n, 
+all squares until rootn
+Now do a unbounded knapsack and find the minimum of all the ways we can form 13
+
+class Solution:
+    def numSquares(self, n: int) -> int:
+
+      max_sq_root = floor(n**0.5)
+
+      options = [option**2 for option in range(max_sq_root, 0, -1)]
+
+
+      dp = [float(inf)]*(n+1)
+      #only 0 instances of 0 are needed to make 0
+      dp[0] = 0 
+      for option in options:
+        for target in range(1, n+1):
+          if option <= target:
+            #min excluding current and including current
+            dp[target] = min(dp[target], 1 + dp[target-option])
+
+      return dp[n]
+
+        
+
+13 => 3
+1,4,9
+TC: (V+ E) => (n + rootn*n) => rootn * n
+SC: max (n) = no of nodes as we keep a visited set
+
+
+class Solution:
+    def numSquares(self, n: int) -> int:
+
+      max_sq_root = int(n**0.5)
+
+      edges = [option**2 for option in range(max_sq_root, 0, -1)]
+      
+      visited = set()
+      queue = collections.defaultdict([(n, 0)])
+      visited.add(n)
+      target = 0
+      
+      while(queue):
+        remaining, steps = queue.popleft() 
+        
+        for edge_weight in edges:
+          if edge_weight <= remaining and (edge_weight - remaining) not in visited:
+          
+            neighbour = (edge_weight - remaining)
+            if neighbour == target:
+              return steps + 1
+            
+            visited.add(neighbour)
+            queue.append((neighbour, steps + 1))
+            
+          
+      
