@@ -1,0 +1,37 @@
+BFS from all empty gates, 
+TC: O(v+E) = O(mn + 4*mn) = O(mn)
+SC: O(mn) for the queue
+
+NOTE: A very imp to remember here is to mark the dist before adding it in the queue, (ew to marking it visited while adding in queue), otherwise if curr added node 
+is a neighbour of a node in next level, it will perceive it as unvisited, and again add it in the queue.
+
+
+class Solution:
+    def wallsAndGates(self, rooms: List[List[int]]) -> None:
+        """
+        Do not return anything, modify rooms in-place instead.
+        """
+        if not rooms: return
+        INF = 2147483647
+        def is_empty_room(x, y):
+          return 0 <= x < len(rooms) and 0 <= y < len(rooms[0]) and rooms[x][y] == INF
+          
+        
+        queue = collections.deque([(x,y) for x in range(len(rooms)) for y in range(len(rooms[0])) if rooms[x][y] == 0])
+        
+        dist = 0
+        while(queue):
+          dist += 1
+          length = len(queue)
+          for i in range(length):
+            x, y = queue.popleft()
+            
+            for new_x, new_y in ((x+1, y), (x-1, y), (x, y-1), (x, y+1)):
+              if is_empty_room(new_x, new_y):
+                queue.append((new_x, new_y))
+                rooms[new_x][new_y] = dist
+          
+        
+            
+                
+          
