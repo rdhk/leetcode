@@ -1,0 +1,69 @@
+class Solution:
+  
+    def evaluate(self, opd1, opd2, op):
+      if op == '+':
+        return opd1 + opd2
+      elif op == '-':
+        return opd1 - opd2
+      elif op == '*':
+        return opd1 * opd2
+      else:
+        if (opd1 < 0 and opd2 > 0) or (opd1 > 0 and opd2 < 0): 
+          return ceil(opd1 / opd2)
+        else:
+          return opd1//opd2
+      
+    def evalRPN(self, tokens: List[str]) -> int:
+      if not tokens: return 0
+      operators = {'+', '-', '*', '/'}
+      # ["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]
+      # [22]
+      
+      stack = []
+      for token in tokens:
+        if token in operators:
+          operand2 = stack.pop()
+          operand1 = stack.pop()
+          stack.append(self.evaluate(operand1, operand2, token))
+        else:
+          stack.append(int(token))
+          
+      return stack.pop()
+
+O(1) extra space, use curr list only
+class Solution:
+      
+    def evalRPN(self, tokens: List[str]) -> int:
+      if not tokens: return 0
+      operators = {
+        '+': lambda x, y: x + y,
+        '-': lambda x, y: x - y,
+        '*': lambda x, y: x*y,
+        '/': lambda x,y: int(x/y)
+                  
+      }
+      # ["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]
+      # [22]
+      
+      def pop():
+        nonlocal tokens, top
+        popped = tokens[top]
+        top -= 1
+        return popped
+      
+      def push(val):
+        nonlocal tokens, top
+        top += 1
+        tokens[top] = val
+        
+      top = -1
+      for token in tokens:
+        if token in operators:
+          operand2 = pop()
+          operand1 = pop()
+          push(operators[token](operand1, operand2))
+        else:
+          push(int(token))
+          
+      return tokens[0]
+        
