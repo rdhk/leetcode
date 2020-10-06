@@ -1,0 +1,95 @@
+'''
+Here either we can do a dfs or a bfs to clone this graph, the methods will be a bit diffrent for both.
+TC will be v+e and sc will be O(v) for both the methods
+'''
+
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val = 0, neighbors = None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+"""
+#DFS Solution
+A - B - E
+|   |
+C - D
+cloned{A: A'[B', C'], B: B'[E', A',D'], E: E',[B'], D: D'[C',B'], C: C'[A',D']}
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val = 0, neighbors = None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+"""
+
+'''
+Here either we can do a dfs or a bfs to clone this graph, the methods will be a bit diffrent for both.
+TC will be v+e and sc will be O(v) for both the methods
+'''
+
+class Solution:
+    def dfs(self, node):
+    
+      #node already cloned before
+      if node.val in self.cloned_nodes:
+        return self.cloned_nodes[node.val]
+        
+      #clone current node
+      cloned_node = Node(node.val)
+      self.cloned_nodes[node.val] = cloned_node
+      
+      for neighbour in node.neighbors:
+        cloned_neighbour = self.dfs(neighbour)
+        cloned_node.neighbors.append(cloned_neighbour)
+      
+      return cloned_node  
+
+    def bfs(self, node):
+      cloned_nodes = {}
+      cloned_root = Node(node.val)
+      cloned_nodes[node.val] = cloned_root
+      queue = collections.deque([node])
+      # #[E, D]
+      # A'[B', C'], B'[A', E', D'], C'[A',D'], E', D'
+      while(queue):
+        curr = queue.popleft()
+        #clone is already prepared before
+        curr_clone = cloned_nodes[curr.val]
+        for neighbor in curr.neighbors:
+          #cloned acts like a visited set
+          if neighbor.val not in cloned_nodes:
+            cloned_nodes[neighbor.val] = Node(neighbor.val)
+            queue.append(neighbor)
+            
+          neighbor_clone = cloned_nodes[neighbor.val]
+          curr_clone.neighbors.append(neighbor_clone)
+
+      return cloned_nodes[node.val]
+          
+    def dfs_stack(self, root):
+      clone_root = Node(root.val)
+      visited = {root.val: clone_root}
+      stack = [root]
+      
+      while(stack):
+        curr = stack.pop()
+        clone = visited[curr.val]
+        
+        for neigh in curr.neighbors:
+          if neigh.val not in visited:
+            visited[neigh.val] = Node(neigh.val)
+            #pls clone its neighbours
+            stack.append(neigh)
+            
+          #curr's neighbours are all cloned and its totally visited/ done/ cloned
+          clone.neighbors.append(visited[neigh.val])
+          
+      return clone_root
+      
+    def cloneGraph(self, node: 'Node') -> 'Node':
+        if not node: return node
+        
+        return self.dfs_stack(node)
+        
+        
