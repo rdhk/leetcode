@@ -1,0 +1,42 @@
+class Solution:
+    def updateMatrix(self, matrix: List[List[int]]) -> List[List[int]]:        
+      #If we do a bfs from each 1 node, we'll be doing N*N work maximum, because our neighbours are sources themselves.
+      #Instead, if we start a BFS from all 0's together, whenever we encounter an unvisited 1, it is the smallest distance from any of the zzeros to that one. So, until we have visited all the nodes, keep continuing the BFS
+      # TC: O(V+E) ie O(N+ 4N) ie O(5N) and SC: (O(N)) for queue and visited.
+      #Traverse in levels, so we know how far the curr node is from the nearest zero, and will be the level + 1
+      
+#         [[0,0,0],  [A,B,C]
+#          [0,1,0],  [D,E,F]
+#          [1,2,1]]  [G,H,I]
+        
+#     queue => [A,B, C,D,F]
+#     [E, G, I]
+      
+      if not matrix or not matrix[0]:
+        return matrix
+      
+      rows = len(matrix)
+      cols = len(matrix[0])
+      total = rows*cols
+      visited = {(x,y) for x in range(rows) for y in range(cols) if matrix[x][y] == 0}
+      queue = collections.deque([(x,y) for x in range(rows) for y in range(cols) if matrix[x][y] == 0])
+      
+      dist = 0
+      #only 1's will be remaining unvisited as all 0's in queue
+      while(queue and len(visited) < total):
+        
+        length = len(queue)
+        dist += 1
+        for i in range(length):
+          x, y = queue.popleft()
+          for new_x, new_y in ((x+1, y), (x-1, y), (x,y+1), (x, y-1)):
+            if 0 <= new_x < rows and 0 <= new_y < cols and (new_x, new_y) not in visited:
+              #update dist to that neighbour
+              matrix[new_x][new_y] = dist
+              visited.add((new_x, new_y))
+              queue.append((new_x, new_y))
+              
+          if len(visited) == total:
+            break
+      
+      return matrix
