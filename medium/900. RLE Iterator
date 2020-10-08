@@ -1,0 +1,173 @@
+Q22.Write an iterator that iterates through a run-length encoded sequence.
+
+The iterator is initialized by RLEIterator(int[] A), where A is a run-length encoding of some sequence.  More specifically, for all even i, A[i] tells us the number of times that the non-negative integer value A[i+1] is repeated in the sequence.
+
+The iterator supports one function: next(int n), which exhausts the next n elements (n >= 1) and returns the last element exhausted in this way.  If there is no element left to exhaust, next returns -1 instead.
+
+For example, we start with A = [3,8,0,9,2,5], which is a run-length encoding of the sequence [8,8,8,5,5].  This is because the sequence can be read as "three eights, zero nines, two fives".
+
+ 
+
+Example 1:
+
+Input: ["RLEIterator","next","next","next","next"], [[[3,8,0,9,2,5]],[2],[1],[1],[2]]
+Output: [null,8,8,5,-1]
+Explanation: 
+RLEIterator is initialized with RLEIterator([3,8,0,9,2,5]).
+This maps to the sequence [8,8,8,5,5].
+RLEIterator.next is then called 4 times:
+
+.next(2) exhausts 2 terms of the sequence, returning 8.  The remaining sequence is now [8, 5, 5].
+
+.next(1) exhausts 1 term of the sequence, returning 8.  The remaining sequence is now [5, 5].
+
+.next(1) exhausts 1 term of the sequence, returning 5.  The remaining sequence is now [5].
+
+.next(2) exhausts 2 terms, returning -1.  This is because the first term exhausted was 5,
+but the second term did not exist.  Since the last term exhausted does not exist, we return -1.
+
+Note:
+
+0 <= A.length <= 1000
+A.length is an even integer.
+0 <= A[i] <= 10^9
+There are at most 1000 calls to RLEIterator.next(int n) per test case.
+Each call to RLEIterator.next(int n) will have 1 <= n <= 10^9.
+
+Brute Force way would be to create a expanded list of sequence and then keep returning the elements from that seq from left according to no of elements requested in next.
+
+But that would be very memory inefficient and also sometimes it might not even be used, if we invoke next very less no of times.
+Since the item in A[i] can be as big as 10^9, it can have max 500*10^9 elements or 5* 10^11 elements.
+
+Now, we can iterate the list on the go to save memory and have a bit of time taken to traverse the list.
+
+make a queue of A to always iterate from the left side of iterator.
+[3,8,0,9,2,5]
+#our next element is somewhere in next iteration
+#do this until queue exists and n > 0
+
+the curr element is the element to be returned, subtract from its freq and return curr element
+if queue.top >= n:
+
+if queue.top is lesser than n:
+  n -= queue.top
+  queue.popleft() twice
+  
+  
+[3,8,0,9,2,5]
+2 since 2 <= 3, 
+[1,8,0,9,2,5]
+return 8
+
+n=2
+1 < 2: pop two elements from left 
+[0,9,2,5]n = 1
+0<1 n = 1
+pop two elem
+[2,5] n = 1
+2 >= 1, so 
+[1,5] , n = 0
+return 1
+
+n=4
+pop2 elemes
+[], n= 3
+since queue empty, and n > 0, return -1
+TC: will be max size(queue) < 0 <= A.length <= 1000 and space is also max length(A)
+
+class RLEIterator:
+  def __init__(self, A):
+    self.queue_A = collections.deque(A)
+    #[1,5]
+  def next(self, n):
+    
+    while(self.queue_A):
+    
+      freq = self.queue_A.popleft() #3
+      element = self.queue_A.popleft() #8
+      #this element is the element to be returned
+      if freq >= n:
+        freq -= n #1
+        if freq > 0:
+          self.queue_A.appendleft(element)
+          self.queue_A.appendleft(freq)
+        return element
+      else:
+        n -= freq
+        
+    #queue is exhausted and n still remains
+    if n > 0: return -1
+    
+class RLEIterator:
+  def __init__(self, A):
+    self.A = A
+    self.front = 0
+    self.size = len(A)
+    
+  def next(self, n):
+    
+    while(self.front < self.size):
+      
+      freq = self.A[self.front] #3
+      element = self.A[self.front+1] #8
+    
+      #this element is the element to be returned
+      if n <= freq:
+        self.A[self.front] -= n #1
+        if self.A[self.front] == 0:
+          self.front += 2
+        return element
+      else:
+        n -= freq
+        self.front += 2
+        
+    #queue is exhausted and n still remains
+    if n > 0: return -1
+    
+BINARY SEARCH
+
+'''
+If length of A was really large, then also this next would have been O(1) amortized
+
+Another way to find is using binary search, although the TC will be a bit on higher side ie O(logn) but the approach is nice
+
+#store the cumulative ending posn of each num in the sequence, and keep a curr no of already processed numbers.
+While doing next, bs for the num that is just >= curr + next
+if curr + next > end, return -1
+'''
+
+class RLEIterator:
+  def __init__(self, A):
+    self.nums = [A[i] for i in range(len(A)) if i % 2]
+    self.nums_end = [A[i] for i in range(len(A)) if i%2 == 0]
+    self.already_processed = 0
+    
+    for idx in range(1, len(self.nums_end)):
+      self.nums_end[idx] += self.nums_end[idx-1]
+    
+  def bsearch_num_just_greater(self, target):
+    l, r = 0, len(self.nums_end) - 1
+    #[3,3,5]
+    while(l < r):
+      mid = l + (r-l)//2
+      if self.nums_end[mid] < target:
+        l = mid + 1
+      else:
+        r = mid
+    return self.nums[l]
+    
+    
+  def next(self, n):
+    if not self.nums:
+      return -1
+    self.already_processed += n
+    
+    if self.already_processed > self.nums_end[-1]:
+      return -1
+    else:
+      return self.bsearch_num_just_greater(self.already_processed)
+    
+# Your RLEIterator object will be instantiated and called as such:
+# obj = RLEIterator(A)
+# param_1 = obj.next(n)
+    
